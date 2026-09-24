@@ -1,0 +1,15 @@
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Bestaande bestanden (css, js, afbeeldingen) direct serveren.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
+
+# Verborgen bestanden (.env, .git) nooit serveren.
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

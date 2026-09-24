@@ -1,0 +1,16 @@
+# Vangnet als de document root NIET op de map public/ kan worden gezet.
+# Alles wordt doorgestuurd naar public/, zodat app/, config/, database/ en .env
+# nooit rechtstreeks via de browser bereikbaar zijn.
+# Beter: stel in Plesk de document root in op httpdocs/public (zie README).
+
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} !/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>

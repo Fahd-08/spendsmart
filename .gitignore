@@ -1,0 +1,16 @@
+# Geheimen en lokale instellingen
+.env
+
+# Logbestanden
+storage/logs/*
+!storage/logs/.gitkeep
+
+# Composer / tests (voor later)
+/vendor/
+.phpunit.cache/
+coverage/
+
+# Systeem- en editorbestanden
+.DS_Store
+.idea/
+.vscode/
