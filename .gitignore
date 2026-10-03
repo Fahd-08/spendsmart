@@ -8,9 +8,13 @@ storage/logs/*
 # Composer / tests (voor later)
 /vendor/
 .phpunit.cache/
-coverage/
+/coverage/
 
 # Systeem- en editorbestanden
 .DS_Store
 .idea/
 .vscode/
+
+# Lokale hulpprogramma's (zie README, sectie Tests)
+/tools/composer.phar
+/tools/pcov.so
