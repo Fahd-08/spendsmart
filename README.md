@@ -6,7 +6,7 @@ Budgettool (MVP) voor MoneyMinds. Studenten registreren oefen-inkomsten en -uitg
 
 ## Techniek
 
-- PHP 8.1+ (getest met 8.2), zonder framework en zonder Composer-afhankelijkheden
+- PHP 8.1+ (getest met 8.2), zonder framework; de app zelf heeft geen Composer-pakketten nodig (Composer alleen voor PHPUnit)
 - MySQL / MariaDB (utf8mb4, InnoDB, foreign keys)
 - Eigen lichte MVC-structuur: router → middleware → controller → repository/service → view
 - HTML/CSS/vanilla JS, responsive (mobile first), werkt ook zonder JavaScript
@@ -28,8 +28,10 @@ config/config.php  Instellingen (leest .env)
 routes/web.php     Alle routes met hun toegangsregels
 database/          schema.sql en seed.sql (demodata)
 public/            Document root: index.php, .htaccess, assets/
-docs/              Verantwoording (eisen ↔ code ↔ planning)
+docs/              Verantwoording (eisen ↔ code ↔ planning) en testrapport
 storage/logs/      Foutlog
+tests/             PHPUnit-tests: Unit/ (losse klassen) en Feature/ (integratie: verzoek → database → HTML)
+tools/             Hulpscripts voor het testen (build-pcov.sh)
 ```
 
 ## Lokaal starten (XAMPP)
@@ -47,6 +49,31 @@ storage/logs/      Foutlog
 | student@spendsmart.test    | Gebruiker (met voorbeeldgegevens) |
 | sanne@spendsmart.test      | Gebruiker (om afscherming te testen) |
 | content@spendsmart.test    | Contentbeheerder |
+
+## Tests (PHPUnit)
+
+De tests gebruiken een eigen database **`spendsmart_test`** (wordt automatisch aangemaakt). Je echte database `spendsmart` wordt nooit aangeraakt. MySQL in XAMPP moet aan staan.
+
+Eenmalig installeren (in de Terminal, in de projectmap):
+
+```
+curl -sSL -o tools/composer.phar https://getcomposer.org/download/latest-stable/composer.phar
+/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar install
+sh tools/build-pcov.sh
+```
+
+`build-pcov.sh` bouwt de coverage-driver PCOV voor de PHP van XAMPP (nodig voor het coverage-rapport; vereist `xcode-select --install`).
+
+Tests draaien:
+
+```
+/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test
+/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test:coverage
+```
+
+Het coverage-rapport staat daarna in `coverage/html/index.html` (openen in de browser) en `coverage/coverage.txt`. De uitleg en resultaten staan in [docs/testrapport.md](docs/testrapport.md).
+
+Op de live server zijn `tests/`, `tools/` en `vendor/` niet nodig.
 
 ## Live zetten op Plesk
 

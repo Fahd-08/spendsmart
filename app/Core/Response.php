@@ -6,10 +6,12 @@ namespace App\Core;
 
 final class Response
 {
+    /**
+     * Stuurt door naar een andere pagina. De RedirectException wordt in public/index.php afgehandeld.
+     */
     public static function redirect(string $url): never
     {
-        header('Location: ' . $url, true, 303);
-        exit;
+        throw new RedirectException($url);
     }
 
     /**

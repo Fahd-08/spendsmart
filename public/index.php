@@ -8,6 +8,7 @@ declare(strict_types=1);
  */
 
 use App\Core\ErrorHandler;
+use App\Core\RedirectException;
 use App\Core\Request;
 use App\Core\Response;
 use App\Core\Router;
@@ -27,6 +28,8 @@ require BASE_PATH . '/routes/web.php';
 
 try {
     $router->dispatch($request);
+} catch (RedirectException $redirect) {
+    $redirect->send();
 } catch (Throwable $exception) {
     ErrorHandler::handle($exception);
 }
