@@ -25,6 +25,12 @@ final class Env
             }
 
             [$key, $value] = array_map('trim', explode('=', $line, 2));
+
+            // Een echte omgevingsvariabele gaat voor (zo gebruiken de tests een eigen database).
+            if (self::get($key) !== null) {
+                continue;
+            }
+
             $_ENV[$key] = trim($value, "\"'");
         }
     }

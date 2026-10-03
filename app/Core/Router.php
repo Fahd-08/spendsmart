@@ -47,10 +47,11 @@ final class Router
                 Middleware::run($middleware);
             }
 
-            $parameters = array_map(
+            // Waarden uit de URL op volgorde doorgeven, zodat de naam van de methode-parameter vrij is.
+            $parameters = array_values(array_map(
                 'intval',
                 array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY)
-            );
+            ));
 
             [$controllerClass, $action] = $route['handler'];
             $controller = new $controllerClass($request);
