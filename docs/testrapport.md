@@ -180,21 +180,42 @@ Om de app testbaar te maken zijn twee kleine aanpassingen gedaan:
 
 ### 7.2 Beperkingen en wat niet automatisch is getest
 
-- **Geen browsertests.** De tests lezen de HTML, maar draaien geen echte browser. Het responsive ontwerp (TE-02), het inklapbare menu, de JavaScript-bevestiging bij verwijderen en de kleuren moeten daarom handmatig worden getest op telefoon, tablet en computer. *(Resultaat handmatige test: invullen)*
-- **Headers en cookies.** `Session::start()` (cookie-instellingen), `Response::sendSecurityHeaders()` (CSP en dergelijke) en `RedirectException::send()` draaien alleen in een echte webserver. Op de command line kunnen headers niet worden uitgelezen. Daardoor scoort `app/Core` "maar" 86,6 %. Deze onderdelen worden handmatig gecontroleerd in de browser (ontwikkelhulpmiddelen → Netwerk → kopjes van een verzoek). *(Resultaat: invullen)*
+- **Geen browsertests.** De tests lezen de HTML, maar draaien geen echte browser. Het responsive ontwerp (TE-02), het inklapbare menu, de JavaScript-bevestiging bij verwijderen en de kleuren zijn daarom handmatig getest op een telefoon en een laptop (zie 7.3). Op een tablet is niet apart getest.
+- **Headers en cookies.** `Session::start()` (cookie-instellingen), `Response::sendSecurityHeaders()` (CSP en dergelijke) en `RedirectException::send()` draaien alleen in een echte webserver. Op de command line kunnen headers niet worden uitgelezen. Daardoor scoort `app/Core` "maar" 86,6 %. Deze onderdelen zijn gecontroleerd op de live server (zie 7.3).
 - **`Database::connection()` lijkt ongetest (15 %),** maar wordt in elke databasetest gebruikt. De verbinding wordt al gemaakt voordat de coverage-meting start, dus de regels worden niet meegeteld.
 - **Niet-bereikbare code.** In `ProfileController::destroy()` staat een extra rolcontrole die nooit wordt bereikt, omdat de route al `role:user` vereist (getest: 403). De rollback in `UserRepository::delete()` is niet getest, omdat een databasefout daar moeilijk na te bootsen is.
 - **Coverage is geen garantie.** 96 % van de regels is uitgevoerd, maar dat betekent niet dat elke combinatie is getest. Daarom zijn naast de coverage bewust unhappy flows en randgevallen gekozen op basis van de eisen, en niet op basis van de code.
 - **Afhankelijk van de demodata en de datum.** De verwachte bedragen komen uit `seed.sql`. Als de demodata verandert, moeten die tests worden aangepast. De demodata gebruikt datums die afhangen van vandaag. Daarom rekenen tests met `Month::current()` in plaats van vaste maanden.
 - **Geen belasting- of prestatietests.** Hoe de app zich gedraagt met veel gebruikers tegelijk is niet getest. Voor een MVP met oefengegevens vind ik dat acceptabel.
 
+### 7.3 Handmatige test op de live server
+
+Getest op 3 oktober 2026 op **https://spendsmart.s2214593.jouw.website** (Plesk, HTTPS met Let's Encrypt).
+
+| # | Apparaat | Controle | Resultaat |
+|---|---|---|---|
+| 1 | Telefoon | Menu klapt open en dicht met de menuknop | Geslaagd |
+| 2 | Telefoon | Dashboard is leesbaar zonder horizontaal scrollen | Geslaagd |
+| 3 | Telefoon | Transacties worden als kaartjes onder elkaar getoond | Geslaagd |
+| 4 | Telefoon | Uitgave van € 30 bij Vervoer geeft een waarschuwing met "geen financieel advies" | Geslaagd |
+| 5 | Laptop | Verwijderen vraagt eerst om bevestiging (JavaScript) | Geslaagd |
+| 6 | Laptop | Contentbeheerder ziet statistieken zonder namen of bedragen | Geslaagd |
+| 7 | Laptop (Terminal) | `.env`, `database/seed.sql` en `composer.json` zijn niet op te vragen (403/404) | Geslaagd |
+| 8 | Laptop (Terminal) | Headers `Content-Security-Policy`, `X-Frame-Options: DENY` en `X-Content-Type-Options: nosniff` worden meegestuurd | Geslaagd |
+| 9 | Laptop (Terminal) | Sessiecookie heeft `Secure`, `HttpOnly` en `SameSite=Lax` | Geslaagd |
+| 10 | Laptop (Terminal) | Inloggen met demo-account stuurt door naar het dashboard; bedragen kloppen | Geslaagd |
+
+Controles 7 t/m 10 zijn gedaan met `curl` vanaf de command line.
+
 ## 8. Conclusie en aanbeveling
 
 **Conclusie.** Alle 12 functionele eisen zijn getest en werken zoals bedoeld. 238 tests met 565 controles slagen, waarvan 43 unhappy flows en 68 randgevallen. 96,3 % van de code wordt door de tests uitgevoerd. De samenwerking tussen frontend, backend en database is per eis met integratietests aangetoond. De belangrijkste risico's voor MoneyMinds zijn ook getest: privacy (niemand ziet gegevens van een ander), juiste bedragen (centen, exacte totalen) en geen adviesclaim (disclaimer bij elke waarschuwing). De enige gevonden fout (voorstel overnemen) is opgelost en wordt nu door een test bewaakt.
 
+De handmatige test op de live server (7.3) bevestigt dat de app ook op telefoon en laptop en via HTTPS goed werkt.
+
 **Aanbeveling.** SpendSmart is als MVP **bruikbaar en betrouwbaar genoeg** om in gebruik te nemen met oefengegevens. Voor een volgende versie raad ik aan:
 
-1. Browsertests toe te voegen (bijvoorbeeld met Playwright) voor responsive weergave, JavaScript en de beveiligingsheaders.
+1. Browsertests toe te voegen (bijvoorbeeld met Playwright), zodat de handmatige controles uit 7.3 ook automatisch gaan en ook op een tablet worden gedaan.
 2. De tests automatisch te laten draaien bij elke push naar GitHub (GitHub Actions met een MariaDB-service), zodat een fout nooit ongemerkt live gaat.
 3. Bij elke nieuwe functie eerst een unhappy-flow- en randgevaltest te schrijven, zodat het huidige niveau behouden blijft.
 
