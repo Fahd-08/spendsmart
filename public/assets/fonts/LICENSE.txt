@@ -1,0 +1,2 @@
+DM Sans en Bricolage Grotesque: SIL Open Font License 1.1 (gratis te gebruiken, ook commercieel).
+Bron: Google Fonts, via het npm-pakket @fontsource-variable. Lokaal opgeslagen zodat de CSP geen externe bronnen hoeft toe te staan.

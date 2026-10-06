@@ -54,7 +54,13 @@ $navigation = match ($currentUser['role'] ?? null) {
 <header class="site-header">
     <div class="container site-header__inner">
         <a class="brand" href="<?= e(url('/')) ?>">
-            <span class="brand__mark" aria-hidden="true">S</span>
+            <!-- Logo: een munt met staafjes die oplopen, zoals een groeiend spaarbedrag. -->
+            <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+                <circle cx="16" cy="16" r="15" fill="#FDE68A"/>
+                <rect x="9" y="17" width="3.5" height="6" rx="1" fill="#0F766E"/>
+                <rect x="14.25" y="13" width="3.5" height="10" rx="1" fill="#0F766E"/>
+                <rect x="19.5" y="9" width="3.5" height="14" rx="1" fill="#0F766E"/>
+            </svg>
             <span class="brand__name">SpendSmart</span>
         </a>
 
