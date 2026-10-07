@@ -8,7 +8,7 @@ Budgettool (MVP) voor MoneyMinds. Studenten registreren oefen-inkomsten en -uitg
 
 - PHP 8.1+ (getest met 8.2), zonder framework; de app zelf heeft geen Composer-pakketten nodig (Composer alleen voor PHPUnit)
 - MySQL / MariaDB (utf8mb4, InnoDB, foreign keys)
-- Eigen lichte MVC-structuur: router → middleware → controller → repository/service → view
+- Eigen MVC-structuur: een verzoek gaat van de router via de middleware naar een controller, die een repository of service gebruikt en daarna een view toont
 - HTML/CSS/vanilla JS, responsive (mobile first), werkt ook zonder JavaScript
 
 ## Mappenstructuur
@@ -30,7 +30,7 @@ database/          schema.sql en seed.sql (demodata)
 public/            Document root: index.php, .htaccess, assets/
 docs/              Verantwoording (eisen ↔ code ↔ planning) en testrapport
 storage/logs/      Foutlog
-tests/             PHPUnit-tests: Unit/ (losse klassen) en Feature/ (integratie: verzoek → database → HTML)
+tests/             PHPUnit-tests: Unit/ (losse klassen) en Feature/ (integratie: een verzoek door de hele app, tot en met de database)
 tools/             Hulpscripts voor het testen (build-pcov.sh)
 ```
 
@@ -77,14 +77,16 @@ Op de live server zijn `tests/`, `tools/` en `vendor/` niet nodig.
 
 ## Live zetten op Plesk
 
-1. **Database**: Plesk → *Databases* → *Add Database* (bijv. `spendsmart`) met een eigen databasegebruiker en een sterk wachtwoord. Open phpMyAdmin via Plesk en importeer `database/schema.sql` en `database/seed.sql`.
-2. **Bestanden**: upload alle bestanden naar `httpdocs/` (via *Files*, FTP, of de *Git*-functie van Plesk vanuit je GitHub-repository).
-3. **Document root**: Plesk → *Hosting & DNS* → *Hosting* → zet *Document root* op `httpdocs/public`. Daardoor zijn `app/`, `config/`, `database/` en `.env` niet via de browser bereikbaar. (Lukt dat niet, dan vangt de `.htaccess` in de hoofdmap dit op.)
-4. **PHP-versie**: Plesk → *PHP* → kies PHP 8.1 of hoger.
-5. **.env**: maak in `httpdocs/` een bestand `.env` op basis van `.env.example`, met de Plesk-databasegegevens en **`APP_DEBUG=false`**.
-6. **HTTPS**: Plesk → *SSL/TLS Certificates* → gratis Let's Encrypt-certificaat, en zet "Redirect from HTTP to HTTPS" aan. De sessiecookie wordt dan automatisch `Secure`.
-7. Zorg dat `storage/logs/` schrijfbaar is voor PHP.
-8. Test: inloggen met de demo-accounts, en controleer dat `https://jouw.website/.env` en `https://jouw.website/../config/config.php` niet op te vragen zijn.
+Zo heb ik de app op mijn eigen Plesk gezet: https://spendsmart.s2214593.jouw.website
+
+1. **Database.** Ga in Plesk naar Databases en klik op Database toevoegen. Maak een database en een databasegebruiker (allebei `spendsmart`) met een sterk wachtwoord. Open phpMyAdmin en importeer eerst `database/schema.sql` en daarna `database/seed.sql`.
+2. **Subdomein.** Ga naar Websites & domeinen en klik op Subdomein toevoegen. Ik heb `spendsmart` gekozen, met als document root `spendsmart/public`. Zo kan niemand via de browser bij `app/`, `config/`, `database/` of `.env`. Lukt het niet om de document root op `public` te zetten, dan vangt de `.htaccess` in de hoofdmap dit op.
+3. **Bestanden.** Ga naar Bestanden, open de map `spendsmart`, upload een zip met de code en pak die daar uit.
+4. **index.html weghalen.** Plesk zet zelf een `index.html` in `public`. Verwijder die, anders zie je de standaardpagina in plaats van SpendSmart.
+5. **.env.** Maak in de map `spendsmart` een bestand `.env` (kijk naar `.env.example`) met de gegevens van de Plesk-database. Zet daar `APP_DEBUG=false` in.
+6. **HTTPS.** Klik op het subdomein en kies SSL/TLS-certificaten. Haal daar een gratis certificaat op bij Let's Encrypt. De sessiecookie krijgt dan vanzelf `Secure`.
+7. **PHP-versie.** Kies PHP 8.1 of hoger.
+8. **Testen.** Log in met een demo-account en controleer dat bijvoorbeeld `/.env` niet te openen is.
 
 ## Beveiliging (samenvatting)
 
@@ -95,7 +97,7 @@ Op de live server zijn `tests/`, `tools/` en `vendor/` niet nodig.
 | XSS | Alle uitvoer via `e()` (`htmlspecialchars`), strenge Content-Security-Policy |
 | CSRF | Token in elk formulier, gecontroleerd bij elk POST-verzoek |
 | Toegang zonder rol | Middleware `auth` en `role:...` per route (403 bij verkeerde rol) |
-| Andermans gegevens (IDOR) | Elke query filtert op `user_id`; niet gevonden → 404 |
+| Andermans gegevens (IDOR) | Elke query filtert op `user_id`. Niet gevonden geeft 404 |
 | Wachtwoord raden | Max. 5 mislukte pogingen per 15 min per e-mail + IP |
 | Session fixation | Nieuw sessie-ID bij in-/uitloggen en wachtwoordwijziging; cookie `HttpOnly`, `SameSite=Lax` |
 | Foutmeldingen lekken info | Technische details alleen in log; gebruiker ziet een nette foutpagina |

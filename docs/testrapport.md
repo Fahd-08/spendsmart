@@ -3,43 +3,46 @@
 | | |
 |---|---|
 | Student | Fahd El Fechka (2214593, klas 24A) |
-| Project | SpendSmart – budgettool (MVP) voor MoneyMinds |
-| Testdatum | 1 oktober 2026 (bijgewerkt 7 oktober 2026, versie v1.5) |
-| Testomgeving | macOS, XAMPP: PHP 8.2.4, MariaDB 10.4.28 |
-| Testframework | PHPUnit 9.6, coverage met PCOV 1.0.12 |
-| Resultaat | **238 tests, 565 controles (assertions): alle geslaagd** |
-| Codedekking | **96,41 % van de regels**, 95,71 % van de methodes |
-| Dekking functionele eisen | **12 van 12 (100 %)** |
+| Project | SpendSmart, budgettool voor MoneyMinds |
+| Testdatum | 1 oktober 2026, bijgewerkt op 7 oktober 2026 (versie v1.7) |
+| Testomgeving | macOS met XAMPP: PHP 8.2.4 en MariaDB 10.4.28 |
+| Testframework | PHPUnit 9.6, coverage gemeten met PCOV 1.0.12 |
+| Resultaat | 238 tests met 565 controles, alles geslaagd |
+| Codedekking | 96,41 % van de regels en 95,71 % van de methodes |
+| Functionele eisen getest | 12 van de 12 (100 %) |
 
 ## 1. Doel
 
-Met deze tests laat ik zien dat alle functionele eisen uit KT1-W3 (FE-01 t/m FE-12) werken zoals bedoeld, ook als de gebruiker iets verkeerd invult (unhappy flows) en bij grensgevallen (randgevallen). Daarnaast controleren de tests dat frontend (HTML-pagina's en formulieren), backend (router, controllers, services) en database goed samenwerken.
+In dit rapport laat ik zien dat alle functionele eisen uit KT1-W3 (FE-01 t/m FE-12) werken. Ik heb niet alleen getest of het werkt als je alles goed invult, maar ook wat er gebeurt als je iets fout doet (unhappy flows) en wat er gebeurt precies op een grens (randgevallen). Ook heb ik getest of de frontend, de backend en de database goed samenwerken.
 
-## 2. Testaanpak
+## 2. Hoe ik heb getest
 
 ### 2.1 Twee soorten tests
 
+Ik heb twee soorten tests geschreven:
+
 | Soort | Map | Aantal | Wat wordt getest |
 |---|---|---|---|
-| Unittests | `tests/Unit` | 91 | Losse klassen zonder database: `Money` (bedragen in centen), `Month` (maandfilter), `Validator` (alle invoerregels), `BudgetService::status()` (limietstatus), helpers zoals `e()` (XSS), `Request`, `View`, `ErrorHandler`. |
-| Integratietests | `tests/Feature` | 147 | Een volledig verzoek door de hele app: **formulier/URL → router → CSRF-controle → middleware (inloggen, rol) → controller → validatie → repository → MariaDB → HTML-pagina**. Daarna controleert de test zowel de pagina (statuscode, redirect, tekst) als de **inhoud van de database**. |
+| Unittests | `tests/Unit` | 91 | Losse klassen zonder database, bijvoorbeeld `Money` (bedragen in centen), `Month` (het maandfilter), `Validator` (alle invoerregels) en `BudgetService` (de status van een limiet). |
+| Integratietests | `tests/Feature` | 147 | Een heel verzoek door de app: van formulier of URL via de router, de CSRF-controle, de middleware, de controller en de repository naar de database, en weer terug als HTML-pagina. Daarna controleer ik de pagina en ook wat er in de database staat. |
 
-De integratietests sturen het verzoek op dezelfde manier door de app als `public/index.php` dat doet (zie `tests/FeatureTestCase.php`). Zo wordt de echte code getest en geen nagemaakte versie. Alleen de browser zelf ontbreekt (zie 7.2).
+De integratietests sturen een verzoek op dezelfde manier door de app als `public/index.php`. Zo test ik de echte code en geen nagemaakte versie. Het enige wat ontbreekt is een echte browser. Daar kom ik in hoofdstuk 7 op terug.
 
-### 2.2 Eigen testdatabase
+### 2.2 Een aparte testdatabase
 
-- De tests gebruiken de database **`spendsmart_test`**, ingesteld in `phpunit.xml`. De echte database wordt nooit aangeraakt. Als de naam van de database niet op `_test` eindigt, weigert de test te starten (`tests/Support/TestDatabase.php`).
-- Bij de start wordt `database/schema.sql` geladen. **Voor elke test** worden alle tabellen geleegd en wordt `database/seed.sql` opnieuw geladen. Elke test begint dus met dezelfde demodata (Sam, Sanne en de contentbeheerder) en tests kunnen elkaar niet beïnvloeden.
+De tests gebruiken een eigen database, `spendsmart_test`. Dat staat ingesteld in `phpunit.xml`. Zo kan ik mijn echte database nooit per ongeluk leegmaken. Als de naam van de database niet op `_test` eindigt, start de test niet eens.
 
-### 2.3 Naamgeving
+Voor elke test worden alle tabellen leeggemaakt en wordt de demodata uit `database/seed.sql` opnieuw geladen. Elke test begint dus met dezelfde gegevens (de gebruikers Sam en Sanne en de contentbeheerder), en tests kunnen elkaar niet beïnvloeden.
 
-De testnamen zijn in het Nederlands en beschrijven wat er gebeurt. Zo is het overzicht met `--testdox` direct leesbaar:
+### 2.3 Namen van de tests
 
-- `test_...`: happy flow (normaal gebruik)
-- `test_unhappy_...`: verkeerd gebruik of foute invoer
-- `test_randgeval_...`: grensgeval (precies op een grens, leeg, maximaal, maandwissel)
+Ik heb de tests Nederlandse namen gegeven die zeggen wat er gebeurt:
 
-Elke testklasse heeft in de documentatie het nummer van de functionele eis (`@group FE-04`). Zo kun je één eis los testen:
+- `test_...` is normaal gebruik (happy flow)
+- `test_unhappy_...` is foute invoer of iets wat niet mag
+- `test_randgeval_...` is een test precies op een grens, bijvoorbeeld het hoogste bedrag of de laatste dag van de maand
+
+Elke testklasse heeft het nummer van de eis die hij test (`@group FE-04`). Zo kan ik ook één eis los testen:
 
 ```
 /Applications/XAMPP/xamppfiles/bin/php vendor/bin/phpunit --group FE-04
@@ -48,11 +51,11 @@ Elke testklasse heeft in de documentatie het nummer van de functionele eis (`@gr
 ### 2.4 Tests uitvoeren
 
 ```
-/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test            # alle tests
-/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test:coverage   # met coverage-rapport
+/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test
+/Applications/XAMPP/xamppfiles/bin/php tools/composer.phar test:coverage
 ```
 
-Het HTML-coveragerapport komt in `coverage/html/index.html`. Installatie-instructies staan in de README (sectie *Tests*).
+Het eerste commando draait alle tests. Het tweede maakt ook het coverage-rapport, dat daarna in `coverage/html/index.html` staat. Hoe je alles installeert, staat in de README bij het kopje Tests.
 
 ## 3. Resultaat
 
@@ -72,157 +75,167 @@ Time: 00:05.302, Memory: 12.00 MB
 OK (238 tests, 565 assertions)
 ```
 
-Unittests: 91 tests, 148 controles. Integratietests: 147 tests, 417 controles. Er zijn geen mislukte, overgeslagen of "risky" tests. Ook bleef het foutlog (`storage/logs/php-error.log`) na de testrun leeg, dus er zijn geen onverwachte 500-fouten opgetreden.
+De 91 unittests doen samen 148 controles en de 147 integratietests doen er 417. Er zijn geen tests mislukt of overgeslagen. Na het draaien van de tests was het foutlog (`storage/logs/php-error.log`) nog leeg, dus er waren ook geen onverwachte fouten.
 
-## 4. Dekking van de functionele eisen
+## 4. Welke eisen zijn getest
 
-Alle 12 geïmplementeerde functionele eisen zijn getest: **12/12 = 100 %** (eis: 90 %).
+Alle 12 functionele eisen zijn getest. Dat is 100 %, en de eis was minimaal 90 %.
 
 | ID | Functionele eis | Testklasse | Tests | Unhappy | Randgeval | Resultaat |
 |---|---|---|---|---|---|---|
 | FE-01 | Account maken | `RegistrationTest` | 12 | 4 | 4 | Geslaagd |
-| FE-02 | Inloggen/uitloggen | `LoginTest` | 14 | 4 | 4 | Geslaagd |
+| FE-02 | Inloggen en uitloggen | `LoginTest` | 14 | 4 | 4 | Geslaagd |
 | FE-03 | Eigen gegevens veilig beheren | `ProfileTest` | 10 | 3 | 2 | Geslaagd |
-| FE-04 | Inkomst/uitgave met datum en categorie | `TransactionTest` | 14 | 5 | 4 | Geslaagd |
-| FE-05 | Filteren per maand en categorie | `FilterTest` | 10 | – | 4 | Geslaagd |
-| FE-06 | Inkomsten en uitgaven per maand optellen | `MonthTotalsTest` | 9 | – | 5 | Geslaagd |
+| FE-04 | Inkomst of uitgave registreren | `TransactionTest` | 14 | 5 | 4 | Geslaagd |
+| FE-05 | Filteren per maand en categorie | `FilterTest` | 10 | 0 | 4 | Geslaagd |
+| FE-06 | Inkomsten en uitgaven per maand optellen | `MonthTotalsTest` | 9 | 0 | 5 | Geslaagd |
 | FE-07 | Eigen categorieën beheren | `CategoryTest` | 13 | 5 | 4 | Geslaagd |
 | FE-08 | Spaardoelen beheren | `SavingsGoalTest` | 14 | 4 | 5 | Geslaagd |
-| FE-09 | Waarschuwen bij overschrijding, zonder advies | `BudgetWarningTest`, `BudgetServiceTest` | 19 | – | 9 | Geslaagd |
+| FE-09 | Waarschuwen bij overschrijding, zonder advies | `BudgetWarningTest`, `BudgetServiceTest` | 19 | 0 | 9 | Geslaagd |
 | FE-10 | Categorievoorstellen beheren en overnemen | `CategorySuggestionTest` | 10 | 4 | 1 | Geslaagd |
 | FE-11 | Leerteksten publiceren | `TipTest` | 11 | 3 | 2 | Geslaagd |
 | FE-12 | Anonieme gebruiksaantallen | `StatisticsTest` | 6 | 1 | 1 | Geslaagd |
-| TE-03/07/08 | Rollen, afscherming, foutpagina's | `AccessTest` | 15 | 10 | 2 | Geslaagd |
-| TE-05/06 | Invoercontrole, bedragen in centen | `ValidatorTest`, `MoneyTest`, `MonthTest`, `SupportTest`, `RequestViewTest` | 81 | – | 21 | Geslaagd |
+| TE-03, TE-07, TE-08 | Rollen, afscherming en foutpagina's | `AccessTest` | 15 | 10 | 2 | Geslaagd |
+| TE-05, TE-06 | Invoercontrole en bedragen in centen | `ValidatorTest`, `MoneyTest`, `MonthTest`, `SupportTest`, `RequestViewTest` | 81 | 0 | 21 | Geslaagd |
 
-In totaal zijn er **43 unhappy-flowtests** en **68 randgevaltests** (eis: minimaal 5 van elk).
+In totaal heb ik 43 unhappy-flowtests en 68 randgevaltests. De eis was minimaal 5 van elk.
 
 ### 4.1 Voorbeelden van unhappy flows
 
-| Test | Wat gebeurt er | Verwacht en gecontroleerd |
+| Test | Wat er gebeurt | Wat ik controleer |
 |---|---|---|
-| `RegistrationTest::test_unhappy_emailadres_bestaat_al` | Registreren met `student@spendsmart.test` | 422, melding "Er bestaat al een account met dit e-mailadres.", geen extra gebruiker in de database |
-| `LoginTest::test_unhappy_fout_wachtwoord` | Inloggen met fout wachtwoord | 422, algemene melding (verraadt niet of het account bestaat), niet ingelogd, poging opgeslagen |
-| `LoginTest::test_unhappy_formulier_zonder_csrf_token_wordt_geweigerd` | Formulier zonder CSRF-token | 419 "Je sessie is verlopen", niet ingelogd |
-| `TransactionTest::test_unhappy_categorie_van_een_andere_gebruiker` | Sam boekt in de categorie "Huur" van Sanne | 422 "Kies een van je eigen categorieën.", niets opgeslagen |
-| `TransactionTest::test_unhappy_transactie_van_een_ander_bekijken_of_verwijderen` | Sam opent, wijzigt en verwijdert een transactie van Sanne | 3× 404, transactie bestaat nog |
-| `CategoryTest::test_unhappy_categorie_met_transacties_kan_niet_worden_verwijderd` | Categorie met transacties verwijderen | Foutmelding, categorie bestaat nog |
-| `ProfileTest::test_unhappy_huidig_wachtwoord_onjuist` | Wachtwoord wijzigen met fout huidig wachtwoord | 422, wachtwoordhash in database ongewijzigd |
-| `CategorySuggestionTest::test_unhappy_inactief_voorstel_kan_niet_worden_overgenomen` | Gebruiker neemt inactief voorstel over | 404, geen categorie aangemaakt |
-| `AccessTest::test_unhappy_gebruiker_kan_niet_bij_beheerpaginas` | Gebruiker opent de 3 beheerpagina's | 3× 403 |
-| `AccessTest::test_unhappy_gebruiker_kan_geen_leertekst_aanmaken_via_formulier` | Gebruiker post direct naar `/content/tips` | 403, niets opgeslagen |
+| `RegistrationTest::test_unhappy_emailadres_bestaat_al` | Registreren met een e-mailadres dat al bestaat | Status 422, de melding "Er bestaat al een account met dit e-mailadres." en er is geen gebruiker bijgekomen |
+| `LoginTest::test_unhappy_fout_wachtwoord` | Inloggen met een fout wachtwoord | Status 422 en een algemene melding, zodat je niet kunt zien of het account bestaat. Niet ingelogd en de poging is opgeslagen |
+| `LoginTest::test_unhappy_formulier_zonder_csrf_token_wordt_geweigerd` | Een formulier versturen zonder CSRF-token | Status 419 en niet ingelogd |
+| `TransactionTest::test_unhappy_categorie_van_een_andere_gebruiker` | Sam probeert iets te boeken in de categorie "Huur" van Sanne | Status 422, de melding "Kies een van je eigen categorieën." en er is niets opgeslagen |
+| `TransactionTest::test_unhappy_transactie_van_een_ander_bekijken_of_verwijderen` | Sam probeert een transactie van Sanne te openen, te wijzigen en te verwijderen | Drie keer status 404 en de transactie bestaat nog |
+| `CategoryTest::test_unhappy_categorie_met_transacties_kan_niet_worden_verwijderd` | Een categorie verwijderen waar nog transacties in staan | Foutmelding en de categorie bestaat nog |
+| `ProfileTest::test_unhappy_huidig_wachtwoord_onjuist` | Wachtwoord wijzigen met een fout huidig wachtwoord | Status 422 en het wachtwoord in de database is niet veranderd |
+| `CategorySuggestionTest::test_unhappy_inactief_voorstel_kan_niet_worden_overgenomen` | Een gebruiker neemt een voorstel over dat niet actief is | Status 404 en er is geen categorie gemaakt |
+| `AccessTest::test_unhappy_gebruiker_kan_niet_bij_beheerpaginas` | Een gewone gebruiker opent de drie beheerpagina's | Drie keer status 403 |
+| `AccessTest::test_unhappy_gebruiker_kan_geen_leertekst_aanmaken_via_formulier` | Een gewone gebruiker stuurt zelf een formulier naar `/content/tips` | Status 403 en er is niets opgeslagen |
 
 ### 4.2 Voorbeelden van randgevallen
 
-| Test | Grens | Verwacht en gecontroleerd |
+| Test | De grens | Wat ik controleer |
 |---|---|---|
-| `LoginTest::test_randgeval_na_5_mislukte_pogingen_wordt_inloggen_geblokkeerd` | 5e mislukte poging | 6e poging geblokkeerd (429), ook met het juiste wachtwoord |
-| `LoginTest::test_randgeval_4_mislukte_pogingen_blokkeren_nog_niet` | 4 pogingen | Inloggen lukt nog, pogingen worden gewist |
-| `LoginTest::test_randgeval_oude_mislukte_pogingen_tellen_niet_mee` | Pogingen van 16 minuten geleden | Tellen niet mee (blokkade is 15 minuten) |
-| `TransactionTest::test_randgeval_hoogst_toegestane_bedrag` | € 9.999.999,99 en € 10.000.000 | Eerste opgeslagen, tweede geweigerd |
-| `MonthTotalsTest::test_randgeval_eerste_en_laatste_dag_van_de_maand_tellen_mee` | 31-12, 01-01, 31-01, 01-02 | Alleen 01-01 en 31-01 tellen mee voor januari |
-| `MonthTotalsTest::test_randgeval_grote_bedragen_worden_exact_opgeteld` | 2 × maximum + 1 cent | Exact 1.999.999.999 cent, geen afrondingsfout |
-| `BudgetServiceTest::test_randgeval_precies_80_procent_is_bijna_bereikt` / `..._79_procent_...` | 79 % en 80 % van de limiet | "Binnen limiet" en "Bijna bereikt" |
-| `BudgetServiceTest::test_randgeval_een_cent_boven_de_limiet_is_overschreden` | Limiet + 1 cent | "Limiet overschreden" |
-| `BudgetWarningTest::test_randgeval_limiet_nul_met_uitgave_toont_100_procent` | Limiet € 0,00 | Elke uitgave geeft een waarschuwing, balk op 100 % |
-| `ValidatorTest::test_ongeldige_datum` (data sets) | 30 februari, 29-02 in 2027 | Geweigerd; 29-02-2028 (schrikkeljaar) wel geldig |
-| `MonthTest::test_randgeval_vorige_maand_van_januari_...` | Jaarwisseling | Januari 2026 → december 2025 |
-| `SavingsGoalTest::test_randgeval_gespaard_bedrag_boven_het_maximum` | Gespaard bedrag zou boven € 9.999.999,99 komen | Geweigerd, bedrag ongewijzigd |
-| `RegistrationTest::test_randgeval_mislukte_registratie_laat_geen_halve_gegevens_achter` | Databasefout halverwege | Rollback: geen gebruiker en geen categorieën achtergebleven |
+| `LoginTest::test_randgeval_na_5_mislukte_pogingen_wordt_inloggen_geblokkeerd` | 5 mislukte pogingen | De 6e poging wordt geblokkeerd (429), ook met het goede wachtwoord |
+| `LoginTest::test_randgeval_4_mislukte_pogingen_blokkeren_nog_niet` | 4 mislukte pogingen | Inloggen lukt nog en de pogingen worden gewist |
+| `LoginTest::test_randgeval_oude_mislukte_pogingen_tellen_niet_mee` | Pogingen van 16 minuten geleden | Die tellen niet mee, want de blokkade duurt 15 minuten |
+| `TransactionTest::test_randgeval_hoogst_toegestane_bedrag` | € 9.999.999,99 en € 10.000.000 | Het eerste bedrag wordt opgeslagen, het tweede niet |
+| `MonthTotalsTest::test_randgeval_eerste_en_laatste_dag_van_de_maand_tellen_mee` | 31 december, 1 januari, 31 januari en 1 februari | Alleen 1 en 31 januari tellen mee voor januari |
+| `MonthTotalsTest::test_randgeval_grote_bedragen_worden_exact_opgeteld` | Twee keer het maximum plus 1 cent | Het totaal is precies 1.999.999.999 cent, zonder afrondingsfout |
+| `BudgetServiceTest::test_randgeval_precies_80_procent_is_bijna_bereikt` en de test voor 79 procent | 79 % en 80 % van de limiet | "Binnen limiet" en "Bijna bereikt" |
+| `BudgetServiceTest::test_randgeval_een_cent_boven_de_limiet_is_overschreden` | De limiet plus 1 cent | "Limiet overschreden" |
+| `BudgetWarningTest::test_randgeval_limiet_nul_met_uitgave_toont_100_procent` | Een limiet van € 0,00 | Elke uitgave geeft een waarschuwing en de balk staat op 100 % |
+| `ValidatorTest::test_ongeldige_datum` | 30 februari en 29 februari 2027 | Allebei geweigerd, terwijl 29 februari 2028 (schrikkeljaar) wel goed is |
+| `MonthTest::test_randgeval_vorige_maand_van_januari_is_december_vorig_jaar` | De jaarwisseling | De maand vóór januari 2026 is december 2025 |
+| `SavingsGoalTest::test_randgeval_gespaard_bedrag_boven_het_maximum` | Het gespaarde bedrag zou boven € 9.999.999,99 komen | Geweigerd en het bedrag is niet veranderd |
+| `RegistrationTest::test_randgeval_mislukte_registratie_laat_geen_halve_gegevens_achter` | Een databasefout halverwege het registreren | Alles is teruggedraaid: geen half account en geen losse categorieën |
 
-## 5. Werking en kwaliteit per functionele eis
+## 5. Hoe goed werkt elke eis
 
-**FE-01 Account maken.** Registreren werkt. Het wachtwoord wordt alleen gehasht opgeslagen (gecontroleerd met `password_verify`) en de gebruiker is direct ingelogd. Een nieuw account krijgt precies de *actieve* categorievoorstellen als startcategorieën. Een e-mailadres wordt opgeslagen in kleine letters en zonder spaties, zodat `STUDENT@...` niet als tweede account kan worden aangemaakt. Mislukt het opslaan halverwege, dan wordt alles teruggedraaid. *Kwaliteit: goed.*
+**FE-01 Account maken.** Registreren werkt. Het wachtwoord wordt alleen als hash opgeslagen en je bent na het registreren meteen ingelogd. Een nieuw account krijgt de actieve categorievoorstellen als startcategorieën. E-mailadressen sla ik op in kleine letters en zonder spaties, zodat iemand niet met `STUDENT@...` een tweede account kan maken. Als het opslaan halverwege misgaat, wordt alles teruggedraaid. Dit werkt goed.
 
-**FE-02 Inloggen/uitloggen.** Inloggen stuurt elke rol naar de eigen startpagina. Bij een fout wachtwoord en bij een onbekend e-mailadres verschijnt dezelfde melding. Na 5 mislukte pogingen volgt 15 minuten blokkade, en oudere pogingen tellen niet mee. Formulieren zonder CSRF-token worden geweigerd. Een sessie van een verwijderd account wordt opgeruimd. Oude wachtwoordhashes worden bij het inloggen automatisch vernieuwd. *Kwaliteit: goed.*
+**FE-02 Inloggen en uitloggen.** Na het inloggen kom je op de startpagina van je rol. Bij een fout wachtwoord en bij een onbekend e-mailadres krijg je dezelfde melding. Na 5 mislukte pogingen kun je 15 minuten niet inloggen, en oudere pogingen tellen niet mee. Formulieren zonder CSRF-token worden geweigerd. Werkt goed.
 
-**FE-03 Eigen gegevens beheren.** Naam en e-mail wijzigen, wachtwoord wijzigen (alleen met het huidige wachtwoord) en het account verwijderen werken allemaal. Bij verwijderen gaan ook alle transacties, categorieën en spaardoelen van die gebruiker weg, terwijl de gegevens van anderen blijven bestaan. Een contentbeheerder kan het eigen account niet verwijderen. *Kwaliteit: goed.*
+**FE-03 Eigen gegevens beheren.** Je naam en e-mail wijzigen, je wachtwoord wijzigen (alleen met je huidige wachtwoord) en je account verwijderen werken allemaal. Bij het verwijderen gaan ook al je transacties, categorieën en spaardoelen weg, maar de gegevens van andere gebruikers blijven staan. Een contentbeheerder kan zijn eigen account niet verwijderen. Werkt goed.
 
-**FE-04 Transacties.** Toevoegen, wijzigen en verwijderen werken. Bedragen worden exact in centen opgeslagen. Ongeldige bedragen (`12,345`, `0`, boven het maximum), ongeldige datums en categorieën van een andere gebruiker worden geweigerd met een duidelijke melding bij het veld. Transacties van een ander zijn niet op te vragen (404). HTML in een omschrijving wordt als tekst getoond (geen XSS). *Kwaliteit: goed.*
+**FE-04 Transacties.** Toevoegen, wijzigen en verwijderen werken. Bedragen worden precies in centen opgeslagen. Een fout bedrag (zoals `12,345` of `0`), een datum die niet bestaat of een categorie van iemand anders wordt geweigerd, met een melding bij het veld. Transacties van een ander kun je niet openen (404). HTML in een omschrijving wordt als gewone tekst getoond, dus XSS werkt niet. Werkt goed.
 
-**FE-05 Filteren.** Filteren op maand, categorie en soort werkt, ook in combinatie. Een ongeldige maand of een categorie van een ander wordt genegeerd met een uitleg, en een lege maand toont een duidelijke lege-lijstmelding. *Kwaliteit: goed.*
+**FE-05 Filteren.** Filteren op maand, categorie en soort werkt, ook samen. Als je een maand invult die niet bestaat of een categorie van een ander kiest, wordt dat genegeerd en krijg je een melding. Bij een lege maand zie je een duidelijke tekst. Werkt goed.
 
-**FE-06 Maandtotalen.** De totalen op het dashboard en boven de lijst kloppen tot op de cent met de demodata (inkomsten € 725,00, uitgaven € 315,58, saldo € 409,42). De eerste en laatste dag van de maand tellen mee, de dag erna niet. Een negatief saldo wordt goed getoond. *Kwaliteit: goed.*
+**FE-06 Maandtotalen.** De totalen op het dashboard kloppen tot op de cent met de demodata: € 725,00 inkomsten, € 315,58 uitgaven en € 409,42 saldo. De eerste en de laatste dag van de maand tellen mee, de dag daarna niet. Een negatief saldo wordt ook goed getoond. Werkt goed.
 
-**FE-07 Categorieën.** Aanmaken, wijzigen en verwijderen werken, net als de maandlimiet (ook € 0,00). Dubbele namen binnen dezelfde soort worden geweigerd. Een categorie met transacties kan niet worden verwijderd en kan niet van soort wisselen, zodat bestaande gegevens betrouwbaar blijven. *Kwaliteit: goed.*
+**FE-07 Categorieën.** Toevoegen, wijzigen en verwijderen werken, en je kunt een maandlimiet instellen (ook € 0,00). Twee categorieën met dezelfde naam en soort kan niet. Een categorie waar nog transacties in staan, kun je niet verwijderen en ook niet van soort veranderen. Zo blijven bestaande gegevens kloppen. Werkt goed.
 
-**FE-08 Spaardoelen.** Aanmaken, wijzigen, bedrag toevoegen en verwijderen werken. Bij het bereiken van het doel verschijnt een felicitatie. Een streefdatum in het verleden wordt bij het aanmaken geweigerd, maar mag bij het wijzigen blijven staan. Het maximum wordt bewaakt. *Kwaliteit: goed.*
+**FE-08 Spaardoelen.** Toevoegen, wijzigen, geld toevoegen en verwijderen werken. Als je je doel bereikt, krijg je een felicitatie. Bij een nieuw doel mag de streefdatum niet in het verleden liggen. Bij het wijzigen mag een oude datum wel blijven staan. Werkt goed.
 
-**FE-09 Budgetwaarschuwing.** Na een uitgave (of wijziging) boven de limiet verschijnt een waarschuwing met de tekst "geen financieel advies". Bij inkomsten, bij een categorie zonder limiet of binnen de limiet verschijnt geen waarschuwing. De grenzen 79 %, 80 %, 100 % en 100 % + 1 cent zijn precies getest. Het dashboard toont overschreden limieten met disclaimer. *Kwaliteit: goed.*
+**FE-09 Budgetwaarschuwing.** Als een uitgave boven de limiet komt, krijg je een waarschuwing met de tekst "geen financieel advies". Bij een inkomst, bij een categorie zonder limiet of als je nog onder de limiet zit, komt er geen waarschuwing. Ik heb de grenzen 79 %, 80 %, 100 % en 100 % plus 1 cent apart getest. Werkt goed.
 
-**FE-10 Categorievoorstellen.** De contentbeheerder kan voorstellen beheren en (de)activeren. Gebruikers zien alleen actieve voorstellen en kunnen ze overnemen, zonder dubbele categorie. Bij het verwijderen van een voorstel blijven de overgenomen categorieën bestaan. *Kwaliteit: goed, na het oplossen van een fout (zie 6).*
+**FE-10 Categorievoorstellen.** De contentbeheerder kan voorstellen maken, wijzigen, aan- en uitzetten en verwijderen. Gebruikers zien alleen actieve voorstellen en kunnen ze overnemen, zonder dat er een dubbele categorie ontstaat. Als een voorstel wordt verwijderd, blijven de overgenomen categorieën gewoon bestaan. Dit werkt nu goed, maar eerst zat hier een fout in (zie hoofdstuk 6).
 
-**FE-11 Leerteksten.** Publiceren, concept opslaan, publiceren en weer intrekken, en verwijderen werken. Gebruikers zien alleen gepubliceerde teksten. HTML in een titel wordt niet uitgevoerd. *Kwaliteit: goed.*
+**FE-11 Leerteksten.** Een tekst als concept opslaan, publiceren, weer terugzetten naar concept en verwijderen werkt. Gebruikers zien alleen gepubliceerde teksten. HTML in een titel wordt niet uitgevoerd. Werkt goed.
 
-**FE-12 Statistieken.** De aantallen kloppen met de database: alleen gewone gebruikers tellen mee, en maanden zonder activiteit tellen als 0. De pagina bevat **geen** namen, e-mailadressen, omschrijvingen of bedragen (getest met `assertDontSee`). *Kwaliteit: goed.*
+**FE-12 Statistieken.** De aantallen kloppen met de database. Alleen gewone gebruikers tellen mee en een maand zonder activiteit telt als 0. Op de pagina staan geen namen, e-mailadressen, omschrijvingen of bedragen. Dat heb ik ook getest. Werkt goed.
 
-## 6. Gevonden fouten
+## 6. Gevonden fout
 
-| # | Gevonden door | Fout | Oplossing |
-|---|---|---|---|
-| 1 | `CategorySuggestionTest::test_gebruiker_ziet_en_neemt_voorstel_over` | Een voorstel overnemen (`/categories/adopt/{id}`) gaf een **500-fout**. De router gaf de waarde uit de URL door met de naam `$id`, maar de methode `adopt()` heet `$suggestionId`. PHP 8 geeft dan "Unknown named parameter". | De router geeft de waarden nu op volgorde door (`array_values`) in `app/Core/Router.php`. Daarna slaagden alle tests. |
+Door de tests heb ik één echte fout gevonden. Als een gebruiker een categorievoorstel wilde overnemen (`/categories/adopt/{id}`), kreeg hij een foutpagina (500). De router gaf het getal uit de URL door met de naam `$id`, maar in de methode `adopt()` heet die parameter `$suggestionId`. PHP 8 geeft dan de fout "Unknown named parameter". De test `CategorySuggestionTest::test_gebruiker_ziet_en_neemt_voorstel_over` liet dit zien.
 
-Deze fout was bij de handmatige rooktest niet opgevallen. Dat laat zien wat geautomatiseerde integratietests toevoegen: ze testen elke route echt en elke keer opnieuw.
+Ik heb het opgelost in `app/Core/Router.php`: de router geeft de waarden nu op volgorde door (met `array_values`) en niet meer op naam. Daarna slaagden alle tests.
 
-Om de app testbaar te maken zijn twee kleine aanpassingen gedaan:
-- `Response::redirect()` gooit nu een `RedirectException` in plaats van `exit`. `public/index.php` vangt die op en stuurt de redirect. Voor de gebruiker verandert er niets, maar een test kan nu controleren *waarheen* wordt doorgestuurd.
-- `Env::load()` overschrijft een bestaande omgevingsvariabele niet meer. Daardoor kan `phpunit.xml` de testdatabase instellen. Op Plesk kan dit ook handig zijn.
+Bij het handmatig testen was deze fout mij niet opgevallen. Dat laat goed zien waarom automatische tests nuttig zijn: ze testen elke route echt, en elke keer opnieuw.
 
-## 7. Reflectie op de kwaliteit van de tests
+Om de app goed te kunnen testen heb ik ook twee kleine dingen veranderd:
 
-### 7.1 Sterke punten
+- `Response::redirect()` gebruikt geen `exit` meer, maar gooit een `RedirectException`. Die wordt in `public/index.php` opgevangen. Voor de gebruiker verandert er niets, maar een test kan nu zien waar de app naartoe doorstuurt.
+- `Env::load()` overschrijft geen instelling meer die al bestaat. Daardoor kan `phpunit.xml` de testdatabase instellen.
 
-- **Echte samenwerking getest.** De integratietests gebruiken de echte router, middleware, controllers, repositories, MariaDB en templates. Er wordt niets nagemaakt (geen mocks). Een fout in de SQL, een route of een template wordt dus gevonden. Fout 1 is daar een bewijs van.
-- **Niet alleen de pagina, ook de database.** Na elke actie controleert de test of de database echt is veranderd, of juist níet (bij unhappy flows). Een test die alleen "status 200" controleert, zou een fout als "melding getoond maar toch opgeslagen" missen.
-- **Beveiliging als testgeval.** Afscherming van gegevens van andere gebruikers (404), rollen (403), CSRF (419), XSS en de inlogblokkade worden automatisch gecontroleerd. Dat zijn de risico's die in de opdracht het zwaarst wegen.
-- **Grenzen precies getest.** Bij de limietstatus, bedragen, datums en maandgrenzen wordt de waarde *op* de grens en *net erover* getest. Daar zitten in de praktijk de meeste fouten.
-- **Onafhankelijk en snel.** Elke test begint met dezelfde data. De volledige set draait in ongeveer 5 seconden, dus het is makkelijk om na elke wijziging alles opnieuw te testen.
-- **Leesbaar.** De Nederlandse testnamen beschrijven het verwachte gedrag. Het testoverzicht leest daardoor als een lijst met eisen.
+## 7. Reflectie op mijn tests
 
-### 7.2 Beperkingen en wat niet automatisch is getest
+### 7.1 Wat goed is
 
-- **Geen browsertests.** De tests lezen de HTML, maar draaien geen echte browser. Het responsive ontwerp (TE-02), het inklapbare menu, de JavaScript-bevestiging bij verwijderen en de kleuren zijn daarom handmatig getest op een telefoon en een laptop (zie 7.3). Op een tablet is niet apart getest.
-- **Headers en cookies.** `Session::start()` (cookie-instellingen), `Response::sendSecurityHeaders()` (CSP en dergelijke) en `RedirectException::send()` draaien alleen in een echte webserver. Op de command line kunnen headers niet worden uitgelezen. Daardoor scoort `app/Core` "maar" 86,6 %. Deze onderdelen zijn gecontroleerd op de live server (zie 7.3).
-- **`Database::connection()` lijkt ongetest (15 %),** maar wordt in elke databasetest gebruikt. De verbinding wordt al gemaakt voordat de coverage-meting start, dus de regels worden niet meegeteld.
-- **Niet-bereikbare code.** In `ProfileController::destroy()` staat een extra rolcontrole die nooit wordt bereikt, omdat de route al `role:user` vereist (getest: 403). De rollback in `UserRepository::delete()` is niet getest, omdat een databasefout daar moeilijk na te bootsen is.
-- **Coverage is geen garantie.** 96 % van de regels is uitgevoerd, maar dat betekent niet dat elke combinatie is getest. Daarom zijn naast de coverage bewust unhappy flows en randgevallen gekozen op basis van de eisen, en niet op basis van de code.
-- **Afhankelijk van de demodata en de datum.** De verwachte bedragen komen uit `seed.sql`. Als de demodata verandert, moeten die tests worden aangepast. De demodata gebruikt datums die afhangen van vandaag. Daarom rekenen tests met `Month::current()` in plaats van vaste maanden.
-- **Geen belasting- of prestatietests.** Hoe de app zich gedraagt met veel gebruikers tegelijk is niet getest. Voor een MVP met oefengegevens vind ik dat acceptabel.
+De integratietests gebruiken de echte router, controllers, database en templates. Ik heb niets nagemaakt (geen mocks). Daardoor vinden de tests ook fouten in de SQL, in een route of in een template. De fout uit hoofdstuk 6 is daar een voorbeeld van.
+
+Ik controleer niet alleen de pagina, maar ook de database. Bij een unhappy flow kijk ik of er echt niets is opgeslagen. Een test die alleen naar de statuscode kijkt, zou een fout als "er staat een foutmelding maar het is toch opgeslagen" missen.
+
+De beveiliging zit in de tests. Ik test automatisch dat je niet bij de gegevens van een ander kunt (404), dat je met de verkeerde rol niet bij een pagina kunt (403), dat formulieren zonder CSRF-token worden geweigerd (419), dat XSS niet werkt en dat inloggen wordt geblokkeerd na te veel pogingen. Voor MoneyMinds zijn dat de belangrijkste risico's.
+
+Bij bedragen, datums, limieten en maanden test ik precies op de grens en net erover. Daar gaat het in de praktijk het vaakst mis.
+
+Alle tests samen duren ongeveer 5 seconden. Ik kan dus na elke wijziging alles opnieuw testen.
+
+### 7.2 Wat beter kan, en wat niet automatisch getest is
+
+Ik heb geen tests met een echte browser. De tests lezen de HTML, maar klikken niet echt. Daarom heb ik het responsive ontwerp, het menu op mobiel, de bevestigingsvraag bij verwijderen en de kleuren met de hand getest op mijn telefoon en laptop (zie 7.3). Op een tablet heb ik niet apart getest.
+
+Sommige code werkt alleen op een echte webserver, bijvoorbeeld het instellen van de sessiecookie en de beveiligingsheaders. Die kan ik op de command line niet testen. Daardoor is de dekking van `app/Core` lager (86,6 %). Deze dingen heb ik op de live server gecontroleerd (zie 7.3).
+
+`Database::connection()` lijkt in het rapport bijna niet getest (15 %), maar wordt in elke databasetest gebruikt. De verbinding wordt al gemaakt voordat de meting begint, daarom tellen die regels niet mee.
+
+In `ProfileController::destroy()` staat een extra controle op de rol die nooit wordt bereikt, omdat de route dat al controleert. Het terugdraaien in `UserRepository::delete()` heb ik niet getest, omdat het lastig is om daar een databasefout na te bootsen.
+
+Een hoge coverage betekent niet dat alles getest is. Het zegt alleen dat de regels zijn uitgevoerd. Daarom heb ik de unhappy flows en randgevallen gekozen vanuit de eisen, en niet alleen gekeken naar welke regels nog niet geraakt werden.
+
+De verwachte bedragen in de tests komen uit `seed.sql`. Als ik de demodata verander, moet ik die tests ook aanpassen.
+
+Ik heb niet getest hoe de app reageert als heel veel mensen hem tegelijk gebruiken. Voor een eerste versie met oefengegevens vind ik dat niet nodig.
 
 ### 7.3 Handmatige test op de live server
 
-Getest op 3 oktober 2026 op **https://spendsmart.s2214593.jouw.website** (Plesk, HTTPS met Let's Encrypt).
+Op 3 oktober 2026 heb ik de live site getest: https://spendsmart.s2214593.jouw.website (Plesk, met HTTPS).
 
-| # | Apparaat | Controle | Resultaat |
+| # | Apparaat | Wat ik heb gecontroleerd | Resultaat |
 |---|---|---|---|
-| 1 | Telefoon | Menu klapt open en dicht met de menuknop | Geslaagd |
-| 2 | Telefoon | Dashboard is leesbaar zonder horizontaal scrollen | Geslaagd |
-| 3 | Telefoon | Transacties worden als kaartjes onder elkaar getoond | Geslaagd |
-| 4 | Telefoon | Uitgave van € 30 bij Vervoer geeft een waarschuwing met "geen financieel advies" | Geslaagd |
-| 5 | Laptop | Verwijderen vraagt eerst om bevestiging (JavaScript) | Geslaagd |
-| 6 | Laptop | Contentbeheerder ziet statistieken zonder namen of bedragen | Geslaagd |
-| 7 | Laptop (Terminal) | `.env`, `database/seed.sql` en `composer.json` zijn niet op te vragen (403/404) | Geslaagd |
-| 8 | Laptop (Terminal) | Headers `Content-Security-Policy`, `X-Frame-Options: DENY` en `X-Content-Type-Options: nosniff` worden meegestuurd | Geslaagd |
-| 9 | Laptop (Terminal) | Sessiecookie heeft `Secure`, `HttpOnly` en `SameSite=Lax` | Geslaagd |
-| 10 | Laptop (Terminal) | Inloggen met demo-account stuurt door naar het dashboard; bedragen kloppen | Geslaagd |
+| 1 | Telefoon | Het menu gaat open en dicht met de menuknop | Geslaagd |
+| 2 | Telefoon | Het dashboard is leesbaar zonder opzij te scrollen | Geslaagd |
+| 3 | Telefoon | Transacties staan als kaartjes onder elkaar | Geslaagd |
+| 4 | Telefoon | Een uitgave van € 30 bij Vervoer geeft een waarschuwing met "geen financieel advies" | Geslaagd |
+| 5 | Laptop | Bij verwijderen wordt eerst gevraagd of je het zeker weet | Geslaagd |
+| 6 | Laptop | De contentbeheerder ziet statistieken zonder namen of bedragen | Geslaagd |
+| 7 | Laptop (Terminal) | `.env`, `database/seed.sql` en `composer.json` zijn niet op te vragen (403 of 404) | Geslaagd |
+| 8 | Laptop (Terminal) | De beveiligingsheaders (`Content-Security-Policy`, `X-Frame-Options` en `X-Content-Type-Options`) worden meegestuurd | Geslaagd |
+| 9 | Laptop (Terminal) | De sessiecookie heeft `Secure`, `HttpOnly` en `SameSite=Lax` | Geslaagd |
+| 10 | Laptop (Terminal) | Inloggen met een demo-account werkt en de bedragen kloppen | Geslaagd |
 
-Controles 7 t/m 10 zijn gedaan met `curl` vanaf de command line.
+Controle 7 tot en met 10 zijn gedaan met `curl` in de Terminal.
 
 ## 8. Conclusie en aanbeveling
 
-**Conclusie.** Alle 12 functionele eisen zijn getest en werken zoals bedoeld. 238 tests met 565 controles slagen, waarvan 43 unhappy flows en 68 randgevallen. 96,4 % van de code wordt door de tests uitgevoerd. De samenwerking tussen frontend, backend en database is per eis met integratietests aangetoond. De belangrijkste risico's voor MoneyMinds zijn ook getest: privacy (niemand ziet gegevens van een ander), juiste bedragen (centen, exacte totalen) en geen adviesclaim (disclaimer bij elke waarschuwing). De enige gevonden fout (voorstel overnemen) is opgelost en wordt nu door een test bewaakt.
+Alle 12 functionele eisen zijn getest en werken. De 238 tests slagen allemaal, waaronder 43 unhappy flows en 68 randgevallen. De tests voeren 96,4 % van de code uit. Met de integratietests heb ik per eis laten zien dat de frontend, de backend en de database goed samenwerken. Ook de dingen die voor MoneyMinds het belangrijkst zijn, zijn getest: niemand kan de gegevens van een ander zien, de bedragen kloppen tot op de cent en bij elke waarschuwing staat dat het geen financieel advies is. De ene fout die ik vond, is opgelost en wordt nu door een test gecontroleerd. De handmatige test laat zien dat de app ook live, op telefoon en laptop, goed werkt.
 
-De handmatige test op de live server (7.3) bevestigt dat de app ook op telefoon en laptop en via HTTPS goed werkt.
+Mijn conclusie is dat SpendSmart als eerste versie goed genoeg is om te gebruiken met oefengegevens.
 
-**Aanbeveling.** SpendSmart is als MVP **bruikbaar en betrouwbaar genoeg** om in gebruik te nemen met oefengegevens. Voor een volgende versie raad ik aan:
+Voor een volgende versie raad ik drie dingen aan:
 
-1. Browsertests toe te voegen (bijvoorbeeld met Playwright), zodat de handmatige controles uit 7.3 ook automatisch gaan en ook op een tablet worden gedaan.
-2. De tests automatisch te laten draaien bij elke push naar GitHub (GitHub Actions met een MariaDB-service), zodat een fout nooit ongemerkt live gaat.
-3. Bij elke nieuwe functie eerst een unhappy-flow- en randgevaltest te schrijven, zodat het huidige niveau behouden blijft.
+1. Tests met een echte browser toevoegen (bijvoorbeeld met Playwright). Dan kunnen de handmatige controles uit 7.3 ook automatisch, en ook op een tablet.
+2. De tests automatisch laten draaien bij elke push naar GitHub (met GitHub Actions). Dan komt een fout nooit ongemerkt online.
+3. Bij elke nieuwe functie meteen ook een unhappy-flowtest en een randgevaltest schrijven.
 
-## Bijlage: coverage-uitvoer (PHPUnit + PCOV)
+## Bijlage: coverage-uitvoer van PHPUnit
 
-Gegenereerd met `composer test:coverage`. Het volledige, klikbare rapport staat in `coverage/html/index.html`.
+Dit is de uitvoer van `composer test:coverage`. Het hele rapport, waarin je kunt doorklikken, staat in `coverage/html/index.html`.
 
 ```
 Code Coverage Report:
