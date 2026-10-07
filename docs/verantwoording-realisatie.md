@@ -1,5 +1,7 @@
 # Verantwoording realisatie SpendSmart (KT1-W3)
 
+**Student:** Fahd El Fechka (2214593, klas 24A) · **Definitieve versie:** GitHub-tag v1.6
+
 Dit document koppelt elke gebouwde functie aan de eis, het ontwerp en de planning.
 
 - **ID en Eis** volgen de functionele eisen uit de opdracht van MoneyMinds. Die nummering wordt ook gebruikt in de code, de tests en het testrapport.
@@ -42,7 +44,7 @@ Dit document koppelt elke gebouwde functie aan de eis, het ontwerp en de plannin
 
 | Onderdeel | Verschil | Reden |
 |---|---|---|
-| "Veilige databaseacties" in de opdracht | Opgevat als **transacties** (inkomsten en uitgaven) | De zin "veilige databaseacties per maand en categorie filteren" past alleen bij transacties; afgestemd met opdrachtgever *(invullen)* |
+| "Veilige databaseacties" in de opdracht | Opgevat als **transacties** (inkomsten en uitgaven) | De zin "veilige databaseacties per maand en categorie filteren" past alleen bij transacties. Dit is mijn eigen interpretatie van de opdracht. |
 | Type van een transactie | Niet apart opgeslagen, maar afgeleid van de categorie | Voorkomt tegenstrijdige gegevens (bijv. uitgave in inkomstencategorie) |
 | Categorie verwijderen | Kan niet als er nog transacties in staan | Voorkomt dat transacties zonder categorie achterblijven (betrouwbaarheid) |
 | Soort van categorie wijzigen | Niet toegestaan als er transacties in staan | Anders veranderen bestaande uitgaven ongemerkt in inkomsten |
