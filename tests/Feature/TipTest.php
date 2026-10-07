@@ -9,6 +9,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-11: Contentbeheerder publiceert leerteksten; gebruikers lezen alleen gepubliceerde teksten.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-11
  */
 final class TipTest extends FeatureTestCase
@@ -116,6 +120,7 @@ final class TipTest extends FeatureTestCase
 
     public function test_randgeval_zonder_gepubliceerde_tips(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('UPDATE tips SET is_published = 0, published_at = NULL');
 
         $this->actingAs(self::SAM_ID)->get('/tips')->assertSee('Er zijn nog geen tips gepubliceerd. Kijk later nog eens.');

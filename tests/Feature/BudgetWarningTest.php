@@ -14,6 +14,10 @@ use Tests\FeatureTestCase;
  *
  * Demodata van Sam deze maand: Vervoer 36,00 van 60,00 limiet, Uitgaan 82,40 van 75,00 limiet (al overschreden).
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-09
  */
 final class BudgetWarningTest extends FeatureTestCase
@@ -121,6 +125,7 @@ final class BudgetWarningTest extends FeatureTestCase
 
     public function test_randgeval_limiet_nul_met_uitgave_toont_100_procent(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('UPDATE categories SET monthly_budget_cents = 0 WHERE id = ' . self::SAM_CADEAUS);
         $this->post('/transactions', ['category_id' => (string) self::SAM_CADEAUS, 'amount' => '1', 'transaction_date' => date('Y-m-d')]);
 

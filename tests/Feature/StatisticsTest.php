@@ -13,6 +13,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-12: Contentbeheerder ziet anonieme gebruiksaantallen (geen namen, e-mailadressen of bedragen).
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-12
  */
 final class StatisticsTest extends FeatureTestCase
@@ -61,6 +65,7 @@ final class StatisticsTest extends FeatureTestCase
 
     public function test_randgeval_lege_database_geeft_overal_nul(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('DELETE FROM transactions');
         $this->db()->exec('DELETE FROM savings_goals');
 

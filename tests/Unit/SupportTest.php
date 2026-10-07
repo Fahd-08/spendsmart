@@ -15,6 +15,9 @@ use RuntimeException;
 
 /**
  * Kleine hulpfuncties en -klassen die overal in de schermen worden gebruikt.
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class SupportTest extends TestCase
 {

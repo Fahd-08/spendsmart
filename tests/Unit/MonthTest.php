@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * De maand bepaalt welke transacties in het filter en in de maandtotalen vallen (FE-05, FE-06).
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class MonthTest extends TestCase
 {
@@ -30,6 +33,7 @@ final class MonthTest extends TestCase
         $this->assertNull(Month::tryFromString($value));
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function invalidMonths(): array
     {
         return [

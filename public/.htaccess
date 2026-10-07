@@ -1,11 +1,19 @@
+# Apache-instellingen voor de map public/ (de document root van de website).
+
+# Geen lijst met bestanden tonen als iemand een map opent (bijv. /assets/).
 Options -Indexes
 
+# mod_rewrite = Apache-module die URL's kan omleiden (alleen gebruiken als hij aan staat).
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
     # Bestaande bestanden (css, js, afbeeldingen) direct serveren.
+    # -f = "is een bestaand bestand", -d = "is een bestaande map"; het uitroepteken betekent "niet".
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
+
+    # Al het andere (bijv. /transactions/5/edit) naar index.php sturen: de front controller.
+    # QSA = de ?query (zoals ?month=2026-09) blijft behouden. L = dit is de laatste regel.
     RewriteRule ^ index.php [QSA,L]
 </IfModule>
 

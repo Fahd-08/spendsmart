@@ -9,6 +9,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-02: Inloggen en uitloggen, inclusief blokkade na te veel mislukte pogingen.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-02
  */
 final class LoginTest extends FeatureTestCase
@@ -84,6 +88,7 @@ final class LoginTest extends FeatureTestCase
 
     public function test_randgeval_oude_mislukte_pogingen_tellen_niet_mee(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec(
             "INSERT INTO login_attempts (email, ip_address, attempted_at) VALUES
              ('student@spendsmart.test', '127.0.0.1', NOW() - INTERVAL 16 MINUTE),
@@ -99,6 +104,7 @@ final class LoginTest extends FeatureTestCase
     public function test_verouderde_wachtwoordhash_wordt_bij_inloggen_vernieuwd(): void
     {
         $oldHash = password_hash(self::PASSWORD, PASSWORD_BCRYPT, ['cost' => 4]);
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->prepare('UPDATE users SET password_hash = ? WHERE id = ?')->execute([$oldHash, self::SAM_ID]);
 
         $this->post('/login', ['email' => 'student@spendsmart.test', 'password' => self::PASSWORD])->assertRedirect('/dashboard');
@@ -137,6 +143,7 @@ final class LoginTest extends FeatureTestCase
     public function test_randgeval_sessie_van_verwijderd_account_wordt_opgeruimd(): void
     {
         $this->actingAs(self::SAM_ID);
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('DELETE FROM transactions WHERE user_id = ' . self::SAM_ID);
         $this->db()->exec('DELETE FROM users WHERE id = ' . self::SAM_ID);
 

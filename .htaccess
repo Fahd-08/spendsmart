@@ -3,14 +3,20 @@
 # nooit rechtstreeks via de browser bereikbaar zijn.
 # Beter: stel in Plesk de document root in op httpdocs/public (zie README).
 
+# Geen lijst met bestanden tonen als iemand een map opent zonder index-bestand.
 Options -Indexes
 
+# mod_rewrite = Apache-module die URL's kan omleiden (alleen gebruiken als hij aan staat).
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Staat "/public/" nog niet in de URL? Dan intern doorsturen naar de map public/.
+    # Voorbeeld: /login wordt public/login (daar pakt public/.htaccess het verder op).
     RewriteCond %{REQUEST_URI} !/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
 
+# Bestanden die met een punt beginnen (.env, .git, .gitignore) nooit tonen: 403 Forbidden.
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
