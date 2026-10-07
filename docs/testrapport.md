@@ -2,12 +2,13 @@
 
 | | |
 |---|---|
+| Student | Fahd El Fechka (2214593, klas 24A) |
 | Project | SpendSmart – budgettool (MVP) voor MoneyMinds |
-| Testdatum | 1 oktober 2026 |
+| Testdatum | 1 oktober 2026 (bijgewerkt 7 oktober 2026, versie v1.5) |
 | Testomgeving | macOS, XAMPP: PHP 8.2.4, MariaDB 10.4.28 |
 | Testframework | PHPUnit 9.6, coverage met PCOV 1.0.12 |
 | Resultaat | **238 tests, 565 controles (assertions): alle geslaagd** |
-| Codedekking | **96,28 % van de regels**, 95,71 % van de methodes |
+| Codedekking | **96,41 % van de regels**, 95,71 % van de methodes |
 | Dekking functionele eisen | **12 van 12 (100 %)** |
 
 ## 1. Doel
@@ -209,7 +210,7 @@ Controles 7 t/m 10 zijn gedaan met `curl` vanaf de command line.
 
 ## 8. Conclusie en aanbeveling
 
-**Conclusie.** Alle 12 functionele eisen zijn getest en werken zoals bedoeld. 238 tests met 565 controles slagen, waarvan 43 unhappy flows en 68 randgevallen. 96,3 % van de code wordt door de tests uitgevoerd. De samenwerking tussen frontend, backend en database is per eis met integratietests aangetoond. De belangrijkste risico's voor MoneyMinds zijn ook getest: privacy (niemand ziet gegevens van een ander), juiste bedragen (centen, exacte totalen) en geen adviesclaim (disclaimer bij elke waarschuwing). De enige gevonden fout (voorstel overnemen) is opgelost en wordt nu door een test bewaakt.
+**Conclusie.** Alle 12 functionele eisen zijn getest en werken zoals bedoeld. 238 tests met 565 controles slagen, waarvan 43 unhappy flows en 68 randgevallen. 96,4 % van de code wordt door de tests uitgevoerd. De samenwerking tussen frontend, backend en database is per eis met integratietests aangetoond. De belangrijkste risico's voor MoneyMinds zijn ook getest: privacy (niemand ziet gegevens van een ander), juiste bedragen (centen, exacte totalen) en geen adviesclaim (disclaimer bij elke waarschuwing). De enige gevonden fout (voorstel overnemen) is opgelost en wordt nu door een test bewaakt.
 
 De handmatige test op de live server (7.3) bevestigt dat de app ook op telefoon en laptop en via HTTPS goed werkt.
 
@@ -225,12 +226,12 @@ Gegenereerd met `composer test:coverage`. Het volledige, klikbare rapport staat 
 
 ```
 Code Coverage Report:
-  2026-10-01 11:45:04
+  2026-10-07 21:22:10
 
  Summary:
   Classes: 79.07% (34/43)
   Methods: 95.71% (223/233)
-  Lines:   96.28% (2069/2149)
+  Lines:   96.41% (2151/2231)
 
 App\Controllers\AuthController                 Methods: 100.00% ( 5/ 5)   Lines: 100.00% ( 75/ 75)
 App\Controllers\CategoryController             Methods: 100.00% (10/10)   Lines: 100.00% ( 89/ 89)
@@ -286,5 +287,5 @@ Dekking per map (uit het HTML-rapport):
 | `app/Repositories` | 99,02 % |
 | `app/Services` | 100 % |
 | `app/Support` | 100 % |
-| `app/Views` | 96,95 % |
+| `app/Views` | 97,23 % |
 | `app/helpers.php` | 97,14 % |
