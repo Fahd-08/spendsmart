@@ -1,5 +1,7 @@
 <?php
 /**
+ * Transactieoverzicht (FE-04, FE-05): filters, totalen en de lijst van één maand.
+ *
  * @var App\Support\Month $month
  * @var array $categories
  * @var int|null $selectedCategoryId
@@ -11,6 +13,7 @@
 
 use App\Support\CategoryType;
 
+// Gekozen filters onthouden, zodat ze blijven staan als je naar een andere maand gaat.
 $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
 ?>
 <div class="page-header">
@@ -24,6 +27,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
 <section class="card filters" aria-label="Filters">
     <?= partial('month-filter', ['month' => $month, 'path' => '/transactions', 'query' => $filterQuery]) ?>
 
+    <?php // Filterformulier met GET: de filters komen in de URL (?type=expense&category=3). ?>
     <form method="get" action="<?= e(url('/transactions')) ?>" class="filters__form">
         <input type="hidden" name="month" value="<?= e($month->key()) ?>">
 
@@ -55,6 +59,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
         <?php endif; ?>
     </form>
 
+    <?php // Snelfilter: elke categorie als klikbaar labeltje. ?>
     <div class="chips" aria-label="Snel filteren op categorie">
         <?php foreach ($categories as $category): ?>
             <a class="chip chip--<?= e($category['type']) ?><?= $selectedCategoryId === (int) $category['id'] ? ' chip--active' : '' ?>"
@@ -64,6 +69,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
     </div>
 </section>
 
+<?php // Lege lijst: andere tekst als er gefilterd wordt. ?>
 <?php if ($transactions === []): ?>
     <?= partial('empty-state', [
         'text' => $isFiltered
@@ -74,6 +80,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
     ]) ?>
 <?php else: ?>
     <section class="card">
+        <?php // Totalen van precies de transacties die nu getoond worden. ?>
         <div class="totals-row">
             <span>Inkomsten: <strong class="amount--income"><?= e(money($totals['income'])) ?></strong></span>
             <span>Uitgaven: <strong class="amount--expense"><?= e(money($totals['expense'])) ?></strong></span>
@@ -82,6 +89,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
         </div>
 
         <div class="table-wrapper">
+            <?php // Tabel; op mobiel maakt de CSS er kaartjes van met data-label als kopje. ?>
             <table class="table">
                 <caption class="visually-hidden">Transacties in <?= e($month->label()) ?></caption>
                 <thead>
@@ -98,6 +106,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
                 <?php foreach ($transactions as $transaction): ?>
                     <tr>
                         <td data-label="Datum"><?= e(format_date($transaction['transaction_date'])) ?></td>
+                        <?php // e() zorgt dat ingevoerde tekst (ook <script>) als gewone tekst wordt getoond. ?>
                         <td data-label="Omschrijving"><?= e($transaction['description'] ?: '—') ?></td>
                         <td data-label="Categorie"><span class="chip chip--<?= e($transaction['type']) ?>"><?= e($transaction['category_name']) ?></span></td>
                         <td data-label="Soort"><?= e(CategoryType::label($transaction['type'])) ?></td>
@@ -106,6 +115,7 @@ $filterQuery = ['category' => $selectedCategoryId, 'type' => $selectedType];
                         </td>
                         <td class="table__actions">
                             <a class="button button--ghost button--small" href="<?= e(url('/transactions/' . $transaction['id'] . '/edit')) ?>">Wijzigen</a>
+                            <?php // Verwijderen gaat via een POST-formulier met CSRF-token en een bevestigingsvraag. ?>
                             <?= partial('delete-button', [
                                 'action' => url('/transactions/' . $transaction['id'] . '/delete'),
                                 'confirm' => 'Weet je zeker dat je deze transactie wilt verwijderen?',

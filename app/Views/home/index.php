@@ -1,5 +1,7 @@
 <?php
 /**
+ * Openbare startpagina voor bezoekers die niet zijn ingelogd.
+ *
  * @var array|null $tip
  */
 
@@ -11,6 +13,7 @@ $exampleBudgets = [
     ['name' => 'Uitgaan', 'budget_cents' => 7500, 'spent_cents' => 8240, 'remaining_cents' => -740, 'percentage' => 109, 'status' => BudgetService::STATUS_OVER],
 ];
 ?>
+<?php // Bovenste deel: titel, uitleg en knoppen naar registreren en inloggen. ?>
 <section class="hero">
     <div class="hero__text">
         <h1>Zie waar je geld blijft</h1>
@@ -21,6 +24,7 @@ $exampleBudgets = [
         </div>
     </div>
 
+    <?php // Voorbeeld van een maandoverzicht met vaste getallen, zodat bezoekers zien wat de app doet. ?>
     <figure class="card example" aria-labelledby="example-title">
         <p class="example__label" id="example-title">Voorbeeld van een maandoverzicht</p>
 
@@ -30,18 +34,21 @@ $exampleBudgets = [
             <tr class="ledger__total"><th scope="row">Over deze maand</th><td><?= e(money(40942)) ?></td></tr>
         </table>
 
+        <?php // Dezelfde budgetbalk als op het dashboard; status_label komt uit de BudgetService. ?>
         <?php foreach ($exampleBudgets as $line): ?>
             <?= partial('budget-bar', ['line' => $line + ['status_label' => BudgetService::statusLabel($line['status'])]]) ?>
         <?php endforeach; ?>
     </figure>
 </section>
 
+<?php // Zo werkt het, in drie stappen. De nummers maakt de CSS (counter). ?>
 <ol class="steps">
     <li><p><strong>Maak je categorieën</strong>Bijvoorbeeld Bijbaan, Boodschappen en Vervoer.</p></li>
     <li><p><strong>Noteer wat er in- en uitgaat</strong>Met bedrag, datum en categorie.</p></li>
     <li><p><strong>Kijk hoe je maand ervoor staat</strong>Totalen, je limieten en je spaardoelen.</p></li>
 </ol>
 
+<?php // Een willekeurige gepubliceerde tip, als die er is. ?>
 <?php if ($tip !== null): ?>
     <?= partial('tip-card', ['tip' => $tip]) ?>
 <?php endif; ?>

@@ -12,6 +12,9 @@ use RuntimeException;
  */
 final class RedirectException extends RuntimeException
 {
+    /**
+     * @param string $url het adres waar de browser naartoe moet, bijv. '/dashboard'
+     */
     public function __construct(private readonly string $url)
     {
         parent::__construct('Redirect naar ' . $url);
@@ -22,6 +25,10 @@ final class RedirectException extends RuntimeException
         return $this->url;
     }
 
+    /**
+     * Stuurt de browser door. Status 303 betekent: "ga naar deze pagina met een GET-verzoek".
+     * Daardoor wordt een formulier niet opnieuw verstuurd als de gebruiker op vernieuwen drukt.
+     */
     public function send(): void
     {
         header('Location: ' . $this->url, true, 303);

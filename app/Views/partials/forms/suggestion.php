@@ -38,6 +38,7 @@ use App\Support\CategoryType;
         <?= field_error($errors, 'description') ?>
     </div>
 
+    <?php // Vinkje actief: niet aangevinkt = het voorstel is verborgen voor gebruikers. ?>
     <div class="field field--checkbox">
         <input type="checkbox" id="is_active" name="is_active" value="1"<?= $values['is_active'] === '1' ? ' checked' : '' ?>>
         <label for="is_active">Actief (zichtbaar als voorstel voor gebruikers)</label>

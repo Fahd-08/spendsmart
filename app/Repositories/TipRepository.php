@@ -5,10 +5,14 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 /**
- * Algemene leerteksten, beheerd door de contentbeheerder.
+ * Algemene leerteksten, beheerd door de contentbeheerder (FE-11).
+ * Een tekst is een concept (is_published = 0) of gepubliceerd (is_published = 1).
  */
 final class TipRepository extends Repository
 {
+    /**
+     * Alle gepubliceerde teksten, nieuwste eerst (pagina Tips voor gebruikers).
+     */
     public function published(): array
     {
         return $this->fetchAll(
@@ -17,6 +21,9 @@ final class TipRepository extends Repository
         );
     }
 
+    /**
+     * Eén willekeurige gepubliceerde tekst (voor de startpagina en het dashboard).
+     */
     public function randomPublished(): ?array
     {
         return $this->fetchOne(
@@ -24,6 +31,10 @@ final class TipRepository extends Repository
         );
     }
 
+    /**
+     * Alle teksten, ook concepten, met de naam van de schrijver (voor de beheerpagina).
+     * LEFT JOIN: ook teksten waarvan de schrijver niet meer bestaat komen mee.
+     */
     public function all(): array
     {
         return $this->fetchAll(
@@ -33,6 +44,9 @@ final class TipRepository extends Repository
         );
     }
 
+    /**
+     * Eén tekst.
+     */
     public function find(int $id): ?array
     {
         return $this->fetchOne(
@@ -42,6 +56,8 @@ final class TipRepository extends Repository
     }
 
     /**
+     * Nieuwe tekst opslaan. Bij direct publiceren wordt de publicatiedatum NOW().
+     *
      * @param array{title: string, body: string, is_published: bool} $data
      */
     public function create(array $data, int $authorId): int
@@ -53,7 +69,7 @@ final class TipRepository extends Repository
                 'title' => $data['title'],
                 'body' => $data['body'],
                 'is_published' => (int) $data['is_published'],
-                'publish_check' => (int) $data['is_published'],
+                'publish_check' => (int) $data['is_published'], // zelfde waarde, tweede plek in de query
                 'author_id' => $authorId,
             ]
         );
@@ -61,6 +77,7 @@ final class TipRepository extends Repository
 
     /**
      * Bij (opnieuw) publiceren krijgt de tekst een publicatiedatum als die er nog niet was.
+     * Bij terugzetten naar concept wordt de publicatiedatum leeggemaakt.
      */
     public function update(int $id, array $data): void
     {
@@ -82,6 +99,9 @@ final class TipRepository extends Repository
         );
     }
 
+    /**
+     * Tekst verwijderen.
+     */
     public function delete(int $id): void
     {
         $this->execute('DELETE FROM tips WHERE id = :id', ['id' => $id]);

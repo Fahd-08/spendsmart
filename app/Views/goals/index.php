@@ -1,5 +1,7 @@
 <?php
 /**
+ * Spaardoelenpagina (FE-08): alle spaardoelen als kaarten.
+ *
  * @var array $goals
  */
 ?>
@@ -20,6 +22,7 @@
 <?php else: ?>
     <div class="card-grid">
         <?php foreach ($goals as $goal): ?>
+            <?php // withActions: hier wel de knoppen (bedrag toevoegen, wijzigen, verwijderen), op het dashboard niet. ?>
             <?= partial('goal-card', ['goal' => $goal, 'withActions' => true]) ?>
         <?php endforeach; ?>
     </div>

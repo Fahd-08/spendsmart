@@ -1,5 +1,7 @@
 <?php
 /**
+ * Registratiepagina (FE-01). Wordt verstuurd naar POST /register (AuthController::register).
+ *
  * @var array $values
  * @var array $errors
  */
@@ -11,6 +13,7 @@
     <?= partial('form-errors', ['errors' => $errors]) ?>
 
     <form method="post" action="<?= e(url('/register')) ?>" novalidate>
+        <?php // Verborgen CSRF-token tegen nagemaakte formulieren van andere sites. ?>
         <?= csrf_field() ?>
 
         <div class="field">
@@ -26,6 +29,7 @@
         </div>
 
         <div class="field">
+            <?php // Wachtwoordvelden krijgen na een fout bewust geen waarde terug (veiligheid). ?>
             <label for="password">Wachtwoord</label>
             <p class="field-hint" id="password-hint">Minimaal 8 tekens, met minstens één letter en één cijfer.</p>
             <input type="password" id="password" name="password" autocomplete="new-password" required minlength="8"<?= field_attributes($errors, 'password') ?>>
@@ -37,6 +41,7 @@
             <input type="password" id="password_confirmation" name="password_confirmation" autocomplete="new-password" required>
         </div>
 
+        <?php // Verplichte bevestiging: alleen oefengegevens, geen bankkoppeling, geen advies. ?>
         <div class="field field--checkbox">
             <input type="checkbox" id="practice_data" name="practice_data" value="1" required<?= field_attributes($errors, 'practice_data') ?>>
             <label for="practice_data">Ik begrijp dat SpendSmart bedoeld is om te oefenen, geen bankkoppeling heeft en geen financieel advies geeft.</label>

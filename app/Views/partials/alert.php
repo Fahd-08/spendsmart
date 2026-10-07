@@ -6,6 +6,7 @@
  * @var string $text
  */
 
+// Tekst vóór de melding ('Gelukt:', 'Fout:'), zodat de soort ook zonder kleur duidelijk is.
 $prefixes = [
     'success' => 'Gelukt',
     'error' => 'Fout',
@@ -13,6 +14,7 @@ $prefixes = [
     'info' => 'Info',
 ];
 $prefix = $prefixes[$type] ?? 'Info';
+// role='alert' laat schermlezers fouten en waarschuwingen meteen voorlezen.
 $role = in_array($type, ['error', 'warning'], true) ? 'alert' : 'status';
 ?>
 <div class="alert alert--<?= e($type) ?>" role="<?= $role ?>">

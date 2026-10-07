@@ -1,5 +1,7 @@
 <?php
 /**
+ * Tips-pagina voor gebruikers (FE-11): alleen gepubliceerde leerteksten.
+ *
  * @var array $tips
  */
 ?>
@@ -17,6 +19,7 @@
         <?php foreach ($tips as $tip): ?>
             <article class="card">
                 <h2><?= e($tip['title']) ?></h2>
+                <?php // Eerst e() (veilig maken), dan nl2br() (enters worden <br>). Andersom zou onveilig zijn. ?>
                 <p><?= nl2br(e($tip['body'])) ?></p>
                 <p class="muted">Gepubliceerd op <?= e(format_date($tip['published_at'])) ?></p>
             </article>

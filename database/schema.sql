@@ -3,6 +3,8 @@
 -- Gebruik: importeer dit bestand in een lege database (phpMyAdmin of mysql-client).
 
 SET NAMES utf8mb4;
+-- Bestaande tabellen weggooien zodat je opnieuw kunt beginnen.
+-- Foreign key checks even uit, anders mag een tabel niet weg zolang een andere ernaar verwijst.
 SET FOREIGN_KEY_CHECKS = 0;
 
 DROP TABLE IF EXISTS login_attempts;
@@ -15,6 +17,7 @@ DROP TABLE IF EXISTS users;
 
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Accounts. Wachtwoorden alleen als bcrypt-hash (password_hash). E-mailadres is uniek.
 CREATE TABLE users (
     id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
     name            VARCHAR(100) NOT NULL,
@@ -54,10 +57,12 @@ CREATE TABLE categories (
     created_at              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    -- Per gebruiker geen twee categorieën met dezelfde naam en soort.
     UNIQUE KEY categories_user_name_type_unique (user_id, name, type),
     KEY categories_suggestion_id_index (suggestion_id),
     CONSTRAINT categories_user_fk FOREIGN KEY (user_id)
         REFERENCES users (id) ON DELETE CASCADE,
+    -- Voorstel verwijderd? Dan blijft de categorie bestaan, alleen de koppeling wordt leeg (SET NULL).
     CONSTRAINT categories_suggestion_fk FOREIGN KEY (suggestion_id)
         REFERENCES category_suggestions (id) ON DELETE SET NULL,
     CONSTRAINT categories_budget_check CHECK (monthly_budget_cents IS NULL OR monthly_budget_cents <= 999999999)
@@ -74,6 +79,7 @@ CREATE TABLE transactions (
     created_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    -- Index: snel zoeken op gebruiker + datum (voor het maandfilter).
     KEY transactions_user_date_index (user_id, transaction_date),
     KEY transactions_category_index (category_id),
     CONSTRAINT transactions_user_fk FOREIGN KEY (user_id)
@@ -81,9 +87,11 @@ CREATE TABLE transactions (
     -- RESTRICT: een categorie met transacties kan niet per ongeluk worden verwijderd.
     CONSTRAINT transactions_category_fk FOREIGN KEY (category_id)
         REFERENCES categories (id) ON DELETE RESTRICT,
+    -- Ook de database bewaakt dat een bedrag groter dan 0 en niet te groot is.
     CONSTRAINT transactions_amount_check CHECK (amount_cents > 0 AND amount_cents <= 999999999)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Spaardoelen. Bij het verwijderen van een gebruiker gaan zijn spaardoelen mee (CASCADE).
 CREATE TABLE savings_goals (
     id              INT UNSIGNED NOT NULL AUTO_INCREMENT,
     user_id         INT UNSIGNED NOT NULL,

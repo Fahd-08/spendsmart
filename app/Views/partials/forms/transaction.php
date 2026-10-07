@@ -19,6 +19,7 @@ use App\Support\CategoryType;
     <div class="field">
         <label for="category_id">Categorie</label>
         <p class="field-hint">De categorie bepaalt of het een inkomst of een uitgave is.</p>
+        <?php // Keuzelijst met eigen categorieën, gegroepeerd per soort (optgroup). ?>
         <select id="category_id" name="category_id" required<?= field_attributes($errors, 'category_id') ?>>
             <option value="">Kies een categorie</option>
             <?php foreach (CategoryType::ALL as $type): ?>
@@ -39,6 +40,7 @@ use App\Support\CategoryType;
             <label for="amount">Bedrag</label>
             <div class="input-group">
                 <span class="input-group__prefix" aria-hidden="true">€</span>
+                <?php // Tekstveld (geen number-veld) zodat '12,50' met komma werkt; inputmode toont op mobiel een cijfertoetsenbord. ?>
                 <input type="text" inputmode="decimal" id="amount" name="amount" value="<?= e($values['amount']) ?>" placeholder="12,50" required maxlength="12"<?= field_attributes($errors, 'amount') ?>>
             </div>
             <?= field_error($errors, 'amount') ?>
@@ -46,6 +48,7 @@ use App\Support\CategoryType;
 
         <div class="field">
             <label for="transaction_date">Datum</label>
+            <?php // Datumkiezer; de server controleert de datum daarna nog een keer (Validator). ?>
             <input type="date" id="transaction_date" name="transaction_date" value="<?= e($values['transaction_date']) ?>" required min="2000-01-01" max="2100-12-31"<?= field_attributes($errors, 'transaction_date') ?>>
             <?= field_error($errors, 'transaction_date') ?>
         </div>

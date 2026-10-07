@@ -1,5 +1,7 @@
 <?php
 /**
+ * Profielpagina (FE-03) met drie formulieren: gegevens wijzigen, wachtwoord wijzigen en account verwijderen.
+ *
  * @var array $user
  * @var array $values
  * @var array $errors
@@ -18,6 +20,7 @@ use App\Support\Role;
 <?= partial('form-errors', ['errors' => $errors]) ?>
 
 <div class="profile-grid">
+    <?php // Formulier 1: naam en e-mailadres -> POST /profile ?>
     <section class="card" aria-labelledby="profile-title">
         <h2 id="profile-title">Mijn gegevens</h2>
         <form method="post" action="<?= e(url('/profile')) ?>" novalidate>
@@ -39,6 +42,7 @@ use App\Support\Role;
         </form>
     </section>
 
+    <?php // Formulier 2: wachtwoord wijzigen (huidig wachtwoord verplicht) -> POST /profile/password ?>
     <section class="card" aria-labelledby="password-title">
         <h2 id="password-title">Wachtwoord wijzigen</h2>
         <form method="post" action="<?= e(url('/profile/password')) ?>" novalidate>
@@ -66,6 +70,7 @@ use App\Support\Role;
         </form>
     </section>
 
+    <?php // Formulier 3: alleen gebruikers mogen hun account verwijderen. data-confirm laat app.js eerst 'Weet je het zeker?' vragen. ?>
     <?php if ($canDeleteAccount): ?>
         <section class="card card--danger" aria-labelledby="delete-title">
             <h2 id="delete-title">Account verwijderen</h2>

@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Spaardoel wijzigen'. Zelfde formulier als toevoegen.
+ *
  * @var array $goal
  * @var array $values
  * @var array $errors

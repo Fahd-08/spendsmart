@@ -25,13 +25,19 @@ final class RegistrationService
     ) {
     }
 
+    /**
+     * Registreert een gebruiker en geeft het nieuwe gebruikers-ID terug.
+     */
     public function register(string $name, string $email, string $plainPassword): int
     {
+        // Databasetransactie: alle stappen hieronder lukken samen, of geen enkele.
         $this->db->beginTransaction();
 
         try {
+            // Wachtwoord nooit als leesbare tekst opslaan: password_hash maakt er een bcrypt-hash van.
             $userId = $this->users->create($name, $email, password_hash($plainPassword, PASSWORD_DEFAULT), Role::USER);
 
+            // Elke actieve voorstelcategorie (bijv. Boodschappen, Vervoer) als eigen categorie klaarzetten.
             foreach ($this->suggestions->active() as $suggestion) {
                 $this->categories->create($userId, [
                     'name' => $suggestion['name'],
@@ -41,10 +47,12 @@ final class RegistrationService
                 ]);
             }
 
+            // Alles gelukt: definitief opslaan.
             $this->db->commit();
 
             return $userId;
         } catch (Throwable $exception) {
+            // Iets mislukt: alles terugdraaien, zodat er geen half account achterblijft.
             $this->db->rollBack();
             throw $exception;
         }

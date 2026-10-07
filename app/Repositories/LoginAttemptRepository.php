@@ -4,8 +4,15 @@ declare(strict_types=1);
 
 namespace App\Repositories;
 
+/**
+ * Mislukte inlogpogingen bijhouden, zodat wachtwoorden raden (brute force) wordt geblokkeerd.
+ * Een poging hoort bij de combinatie e-mailadres + IP-adres.
+ */
 final class LoginAttemptRepository extends Repository
 {
+    /**
+     * Aantal mislukte pogingen in de laatste X minuten.
+     */
     public function countRecentFailures(string $email, string $ipAddress, int $minutes): int
     {
         return (int) $this->fetchValue(
@@ -16,6 +23,9 @@ final class LoginAttemptRepository extends Repository
         );
     }
 
+    /**
+     * Een mislukte poging opslaan (tijdstip wordt automatisch NOW()).
+     */
     public function record(string $email, string $ipAddress): void
     {
         $this->execute(
@@ -24,6 +34,9 @@ final class LoginAttemptRepository extends Repository
         );
     }
 
+    /**
+     * Na een geslaagde login de oude mislukte pogingen wissen.
+     */
     public function clear(string $email, string $ipAddress): void
     {
         $this->execute(

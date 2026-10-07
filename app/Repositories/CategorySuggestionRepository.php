@@ -5,10 +5,15 @@ declare(strict_types=1);
 namespace App\Repositories;
 
 /**
- * Algemene categorievoorstellen, beheerd door de contentbeheerder.
+ * Algemene categorievoorstellen, beheerd door de contentbeheerder (FE-10).
+ * Gebruikers kunnen actieve voorstellen overnemen als eigen categorie.
  */
 final class CategorySuggestionRepository extends Repository
 {
+    /**
+     * Alle voorstellen (ook inactieve), met hoe vaak elk voorstel is overgenomen.
+     * Voor de beheerpagina en de statistieken.
+     */
     public function all(): array
     {
         return $this->fetchAll(
@@ -19,6 +24,9 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Alleen actieve voorstellen: die zien gebruikers en die krijgt een nieuw account.
+     */
     public function active(): array
     {
         return $this->fetchAll(
@@ -27,6 +35,9 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Eén voorstel (voor de contentbeheerder, ook als het inactief is).
+     */
     public function find(int $id): ?array
     {
         return $this->fetchOne(
@@ -35,6 +46,9 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Eén voorstel, maar alleen als het actief is (voor overnemen door een gebruiker).
+     */
     public function findActive(int $id): ?array
     {
         return $this->fetchOne(
@@ -43,6 +57,9 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Bestaat er al een voorstel met deze naam en soort?
+     */
     public function nameExists(string $name, string $type, ?int $exceptId = null): bool
     {
         return (bool) $this->fetchValue(
@@ -52,6 +69,8 @@ final class CategorySuggestionRepository extends Repository
     }
 
     /**
+     * Nieuw voorstel opslaan; created_by = de contentbeheerder die het maakte.
+     *
      * @param array{name: string, type: string, description: ?string, is_active: bool} $data
      */
     public function create(array $data, int $createdBy): int
@@ -63,6 +82,9 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Voorstel wijzigen.
+     */
     public function update(int $id, array $data): void
     {
         $this->execute(
@@ -73,12 +95,18 @@ final class CategorySuggestionRepository extends Repository
         );
     }
 
+    /**
+     * Voorstel verwijderen.
+     */
     public function delete(int $id): void
     {
         // Categorieën van gebruikers blijven bestaan; alleen de koppeling vervalt (ON DELETE SET NULL).
         $this->execute('DELETE FROM category_suggestions WHERE id = :id', ['id' => $id]);
     }
 
+    /**
+     * De kolomwaarden die bij create en update hetzelfde zijn. is_active wordt 1 of 0.
+     */
     private function columns(array $data): array
     {
         return [

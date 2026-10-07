@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Categorievoorstel wijzigen'. Zelfde formulier als toevoegen.
+ *
  * @var array $suggestion
  * @var array $values
  * @var array $errors

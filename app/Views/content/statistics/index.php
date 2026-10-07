@@ -1,10 +1,13 @@
 <?php
 /**
+ * Statistieken voor de contentbeheerder (FE-12). Alleen aantallen, geen persoonsgegevens of bedragen.
+ *
  * @var array $statistics zie StatisticsService::overview()
  */
 
 use App\Support\CategoryType;
 
+// Totaal over alle maanden; bij 0 tonen we een lege-lijstmelding in plaats van een lege tabel.
 $activityTotal = array_sum(array_column($statistics['activity'], 'transaction_count'));
 ?>
 <div class="page-header">
@@ -14,6 +17,7 @@ $activityTotal = array_sum(array_column($statistics['activity'], 'transaction_co
     </div>
 </div>
 
+<?php // Drie kerncijfers: gebruikers, transacties en spaardoelen. ?>
 <section class="stats" aria-label="Totalen">
     <div class="stat card">
         <p class="stat__label">Gebruikers</p>
@@ -49,6 +53,7 @@ $activityTotal = array_sum(array_column($statistics['activity'], 'transaction_co
                     </tr>
                     </thead>
                     <tbody>
+                    <?php // Per maand: aantal transacties (met balk) en aantal actieve gebruikers. ?>
                     <?php foreach ($statistics['activity'] as $row): ?>
                         <?php $width = bar_width($row['percentage']); ?>
                         <tr>
@@ -68,6 +73,7 @@ $activityTotal = array_sum(array_column($statistics['activity'], 'transaction_co
         <?php endif; ?>
     </section>
 
+    <?php // Hoe vaak elk categorievoorstel is overgenomen. ?>
     <section class="card" aria-labelledby="adoption-title">
         <h2 id="adoption-title">Gebruik van categorievoorstellen</h2>
 

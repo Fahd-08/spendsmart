@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Categorie toevoegen'. Het formulier staat in partials/forms/category.php.
+ *
  * @var array $values
  * @var array $errors
  */

@@ -21,6 +21,7 @@
 
     <div class="form__row">
         <div class="field">
+            <?php // Doelbedrag is verplicht en moet groter zijn dan € 0,00. ?>
             <label for="target_amount">Doelbedrag</label>
             <div class="input-group">
                 <span class="input-group__prefix" aria-hidden="true">€</span>
@@ -40,6 +41,7 @@
     </div>
 
     <div class="field">
+        <?php // Streefdatum is optioneel; bij een nieuw doel mag hij niet in het verleden liggen. ?>
         <label for="target_date">Streefdatum <span class="optional">(optioneel)</span></label>
         <input type="date" id="target_date" name="target_date" value="<?= e($values['target_date']) ?>" min="2000-01-01" max="2100-12-31"<?= field_attributes($errors, 'target_date') ?>>
         <?= field_error($errors, 'target_date') ?>

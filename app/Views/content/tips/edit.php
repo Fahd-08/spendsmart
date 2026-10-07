@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Leertekst wijzigen'. Zelfde formulier als toevoegen.
+ *
  * @var array $tip
  * @var array $values
  * @var array $errors

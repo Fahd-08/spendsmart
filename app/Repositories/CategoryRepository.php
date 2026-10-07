@@ -10,6 +10,10 @@ namespace App\Repositories;
  */
 final class CategoryRepository extends Repository
 {
+    /**
+     * Alle categorieën van een gebruiker, met per categorie het aantal transacties.
+     * Volgorde: eerst uitgaven, dan inkomsten (type DESC), daarna op naam.
+     */
     public function allForUser(int $userId): array
     {
         return $this->fetchAll(
@@ -22,6 +26,9 @@ final class CategoryRepository extends Repository
         );
     }
 
+    /**
+     * Eén categorie, maar alleen als die van deze gebruiker is (anders null -> 404).
+     */
     public function findForUser(int $id, int $userId): ?array
     {
         return $this->fetchOne(
@@ -31,6 +38,10 @@ final class CategoryRepository extends Repository
         );
     }
 
+    /**
+     * Heeft de gebruiker al een categorie met deze naam en soort?
+     * Bij wijzigen telt de categorie zelf niet mee ($exceptId).
+     */
     public function nameExists(int $userId, string $name, string $type, ?int $exceptId = null): bool
     {
         return (bool) $this->fetchValue(
@@ -40,6 +51,9 @@ final class CategoryRepository extends Repository
         );
     }
 
+    /**
+     * Staan er transacties in deze categorie? Dan mag hij niet weg en niet van soort wisselen.
+     */
     public function hasTransactions(int $id, int $userId): bool
     {
         return (bool) $this->fetchValue(
@@ -49,6 +63,8 @@ final class CategoryRepository extends Repository
     }
 
     /**
+     * Nieuwe categorie opslaan. suggestion_id is gevuld als de categorie van een voorstel komt.
+     *
      * @param array{name: string, type: string, monthly_budget_cents: ?int, suggestion_id?: ?int} $data
      */
     public function create(int $userId, array $data): int
@@ -66,6 +82,9 @@ final class CategoryRepository extends Repository
         );
     }
 
+    /**
+     * Categorie wijzigen. "AND user_id" zorgt dat je alleen je eigen categorie kunt wijzigen.
+     */
     public function update(int $id, int $userId, array $data): void
     {
         $this->execute(
@@ -81,6 +100,9 @@ final class CategoryRepository extends Repository
         );
     }
 
+    /**
+     * Categorie verwijderen (alleen je eigen).
+     */
     public function delete(int $id, int $userId): void
     {
         $this->execute('DELETE FROM categories WHERE id = :id AND user_id = :user_id', [
@@ -90,6 +112,8 @@ final class CategoryRepository extends Repository
     }
 
     /**
+     * Welke voorstellen heeft de gebruiker al overgenomen? Die worden niet meer als voorstel getoond.
+     *
      * @return int[] ID's van voorstellen die de gebruiker al heeft overgenomen
      */
     public function adoptedSuggestionIds(int $userId): array

@@ -1,5 +1,7 @@
 <?php
 /**
+ * Beheerpagina categorievoorstellen (FE-10) voor de contentbeheerder.
+ *
  * @var array $suggestions
  */
 
@@ -40,6 +42,7 @@ use App\Support\CategoryType;
                         <td data-label="Naam"><span class="chip chip--<?= e($suggestion['type']) ?>"><?= e($suggestion['name']) ?></span></td>
                         <td data-label="Soort"><?= e(CategoryType::label($suggestion['type'])) ?></td>
                         <td data-label="Omschrijving"><?= e($suggestion['description'] ?: '—') ?></td>
+                        <?php // Actief = zichtbaar voor gebruikers en klaargezet voor nieuwe accounts. ?>
                         <td data-label="Status">
                             <span class="status <?= $suggestion['is_active'] ? 'status--ok' : 'status--none' ?>">
                                 <?= $suggestion['is_active'] ? 'Actief' : 'Inactief' ?>
