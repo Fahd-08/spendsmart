@@ -11,6 +11,9 @@ use RuntimeException;
 
 /**
  * Invoer uit het verzoek en het tonen van templates.
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class RequestViewTest extends TestCase
 {

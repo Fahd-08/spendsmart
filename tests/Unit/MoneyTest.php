@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Bedragen worden als hele centen opgeslagen (TE-06). Een fout hier geeft verkeerde totalen in de hele app.
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class MoneyTest extends TestCase
 {
@@ -20,6 +23,7 @@ final class MoneyTest extends TestCase
         $this->assertSame($expectedCents, Money::parse($input));
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function validAmounts(): array
     {
         return [
@@ -42,6 +46,7 @@ final class MoneyTest extends TestCase
         $this->assertNull(Money::parse($input));
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function invalidAmounts(): array
     {
         return [

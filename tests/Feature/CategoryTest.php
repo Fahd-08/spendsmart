@@ -9,6 +9,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-07: Eigen categorieën beheren, met een maandlimiet per uitgavencategorie.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-07
  */
 final class CategoryTest extends FeatureTestCase

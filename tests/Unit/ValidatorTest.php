@@ -10,6 +10,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * Alle formulierinvoer gaat door de Validator (TE-05). Elke regel krijgt een geldige en een ongeldige test.
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class ValidatorTest extends TestCase
 {
@@ -78,6 +81,7 @@ final class ValidatorTest extends TestCase
         $this->assertTrue(Validator::make(['id' => $value], ['id' => 'integer'])->fails());
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function invalidIntegers(): array
     {
         return [
@@ -124,6 +128,7 @@ final class ValidatorTest extends TestCase
         $this->assertFalse(Validator::isValidDate($date));
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function invalidDates(): array
     {
         return [
@@ -148,6 +153,7 @@ final class ValidatorTest extends TestCase
         $this->assertFalse(Validator::isStrongPassword($password));
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function weakPasswords(): array
     {
         return [

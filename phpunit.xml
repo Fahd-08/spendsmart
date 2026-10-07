@@ -3,6 +3,12 @@
     PHPUnit-configuratie voor SpendSmart.
     De tests gebruiken een eigen database (spendsmart_test), zodat je echte gegevens nooit worden aangeraakt.
 -->
+<!--
+    Uitleg van de instellingen hieronder:
+    - bootstrap: bestand dat eerst wordt uitgevoerd (testdatabase klaarzetten)
+    - failOnRisky / failOnWarning: een test met waarschuwing of zonder controle telt als mislukt
+    - stderr: PHPUnit schrijft naar stderr, zodat sessies in de tests werken (geen "headers already sent")
+-->
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="tests/bootstrap.php"
@@ -13,6 +19,7 @@
          beStrictAboutOutputDuringTests="true"
          stderr="true"
          verbose="true">
+    <!-- Twee groepen tests: Unit (losse klassen) en Integratie (hele verzoek door router, controller, database, view). -->
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
@@ -22,6 +29,7 @@
         </testsuite>
     </testsuites>
 
+    <!-- Coverage: welk deel van de code in app/ door de tests wordt uitgevoerd. Rapport in coverage/. -->
     <coverage cacheDirectory=".phpunit.cache/code-coverage">
         <include>
             <directory suffix=".php">app</directory>
@@ -32,6 +40,7 @@
         </report>
     </coverage>
 
+    <!-- Instellingen tijdens de tests. force="true" gaat vóór .env, dus de tests gebruiken altijd spendsmart_test. -->
     <php>
         <env name="APP_ENV" value="testing" force="true"/>
         <env name="APP_DEBUG" value="false" force="true"/>

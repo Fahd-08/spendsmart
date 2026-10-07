@@ -12,6 +12,9 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * FE-09: de status van een maandlimiet. Deze berekening heeft geen database nodig.
+ *
+ * Leeswijzer: een unittest roept één methode aan en controleert de uitkomst met assert...
+ * Geen database en geen browser nodig. test_randgeval_... = grensgeval.
  */
 final class BudgetServiceTest extends TestCase
 {

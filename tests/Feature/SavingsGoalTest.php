@@ -9,6 +9,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-08: Spaardoelen beheren en er bedragen aan toevoegen.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-08
  */
 final class SavingsGoalTest extends FeatureTestCase
@@ -126,6 +130,7 @@ final class SavingsGoalTest extends FeatureTestCase
     public function test_randgeval_gespaard_bedrag_boven_het_maximum(): void
     {
         $id = $this->goalId('Nieuwe laptop');
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec("UPDATE savings_goals SET saved_cents = 999999000 WHERE id = {$id}");
 
         $this->post("/goals/{$id}/deposit", ['amount' => '10'])->assertRedirect('/goals');
@@ -156,6 +161,7 @@ final class SavingsGoalTest extends FeatureTestCase
 
     public function test_randgeval_lege_lijst_toont_uitleg(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('DELETE FROM savings_goals WHERE user_id = ' . self::SAM_ID);
 
         $this->get('/goals')

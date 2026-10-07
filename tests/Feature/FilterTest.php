@@ -10,6 +10,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-05: Transacties per maand en categorie filteren.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-05
  */
 final class FilterTest extends FeatureTestCase

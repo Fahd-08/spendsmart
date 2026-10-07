@@ -15,7 +15,7 @@ use Tests\Support\TestDatabase;
  */
 abstract class DatabaseTestCase extends TestCase
 {
-    // ID's uit database/seed.sql
+    // ID's uit database/seed.sql, zodat de tests leesbaar zijn (self::SAM_ID in plaats van 2).
     protected const CONTENT_MANAGER_ID = 1;
     protected const SAM_ID = 2;
     protected const SANNE_ID = 3;
@@ -30,12 +30,18 @@ abstract class DatabaseTestCase extends TestCase
     // Categorie van Sanne
     protected const SANNE_HUUR = 10;
 
+    /**
+     * PHPUnit roept setUp() vóór elke test aan: database leeg en demodata opnieuw laden.
+     */
     protected function setUp(): void
     {
         parent::setUp();
         TestDatabase::reset();
     }
 
+    /**
+     * De databaseverbinding, om in een test direct gegevens te controleren of klaar te zetten.
+     */
     protected function db(): PDO
     {
         return Database::connection();

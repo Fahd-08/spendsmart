@@ -15,6 +15,10 @@ use Tests\FeatureTestCase;
  * inkomsten 425,00 + 300,00 = 725,00
  * uitgaven  64,35 + 52,10 + 48,75 + 36,00 + 42,50 + 39,90 + 17,99 + 13,99 = 315,58
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-06
  */
 final class MonthTotalsTest extends FeatureTestCase

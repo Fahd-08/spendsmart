@@ -12,6 +12,10 @@ use Tests\FeatureTestCase;
  * Demodata: voorstellen 1 t/m 6 zijn actief, 7 (Studiekosten) is inactief.
  * Sanne heeft voorstel 2 (Studiefinanciering) nog niet overgenomen.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-10
  */
 final class CategorySuggestionTest extends FeatureTestCase

@@ -9,6 +9,10 @@ use Tests\FeatureTestCase;
 /**
  * TE-03, TE-07, TE-08: rollen, afscherming en foutpagina's over de hele app.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group toegang
  */
 final class AccessTest extends FeatureTestCase
@@ -21,6 +25,7 @@ final class AccessTest extends FeatureTestCase
         $this->actingAs(self::CONTENT_MANAGER_ID)->get($path)->assertStatus(403);
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function userPages(): array
     {
         return [['/dashboard'], ['/transactions'], ['/categories'], ['/goals'], ['/tips']];
@@ -34,6 +39,7 @@ final class AccessTest extends FeatureTestCase
         $this->actingAs(self::SAM_ID)->get($path)->assertStatus(403);
     }
 
+    // Lijst met testgevallen: elke regel wordt een aparte test (de naam links verschijnt in het testrapport).
     public function contentManagerPages(): array
     {
         return [['/content/statistics'], ['/content/tips'], ['/content/suggestions']];

@@ -10,6 +10,10 @@ use Tests\FeatureTestCase;
 /**
  * FE-04: Inkomst of uitgave met datum en categorie registreren, wijzigen en verwijderen.
  *
+ * Leeswijzer: elke test heeft drie stappen: klaarzetten (bijv. actingAs = inloggen),
+ * actie (get/post = pagina openen of formulier versturen) en controleren (assert...).
+ * test_... = normaal gebruik, test_unhappy_... = foute invoer of geen toegang, test_randgeval_... = grensgeval.
+ *
  * @group FE-04
  */
 final class TransactionTest extends FeatureTestCase
@@ -194,6 +198,7 @@ final class TransactionTest extends FeatureTestCase
 
     public function test_randgeval_zonder_categorieen_eerst_een_categorie_maken(): void
     {
+        // Klaarzetten: de database direct aanpassen om dit scenario na te bootsen.
         $this->db()->exec('DELETE FROM transactions WHERE user_id = ' . self::SAM_ID);
         $this->db()->exec('DELETE FROM categories WHERE user_id = ' . self::SAM_ID);
 
