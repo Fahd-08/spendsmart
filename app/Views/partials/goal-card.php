@@ -10,6 +10,7 @@ use App\Support\Money;
 
 $target = (int) $goal['target_cents'];
 $saved = (int) $goal['saved_cents'];
+// Hoeveel procent is gespaard (zonder floats), en de breedte van de balk in stappen van 5%.
 $percentage = Money::percentage($saved, $target);
 $width = bar_width($percentage);
 $isReached = $saved >= $target;
@@ -27,6 +28,7 @@ $withActions ??= false;
         <strong><?= e(money($saved)) ?></strong> van <?= e(money($target)) ?>
     </p>
 
+    <?php // Voortgangsbalk; aria-label leest het percentage voor aan schermlezers. ?>
     <div class="bar" role="img" aria-label="<?= e($percentage . '% van het doel gespaard') ?>">
         <div class="bar__fill <?= $isReached ? 'bar__fill--ok' : 'bar__fill--progress' ?> w-<?= $width ?>"></div>
     </div>
@@ -41,6 +43,7 @@ $withActions ??= false;
         <?php endif; ?>
     </p>
 
+    <?php // Formulier om geld toe te voegen (POST /goals/{id}/deposit) en de knoppen wijzigen/verwijderen. ?>
     <?php if ($withActions): ?>
         <form class="goal-card__deposit" method="post" action="<?= e(url('/goals/' . $goal['id'] . '/deposit')) ?>">
             <?= csrf_field() ?>

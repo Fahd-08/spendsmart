@@ -16,6 +16,8 @@
     font-display: swap;
 }
 
+/* Variabelen (custom properties): kleuren en maten staan op één plek.
+   Overal gebruiken we var(--color-primary) enzovoort; één kleur aanpassen = overal aangepast. */
 :root {
     --color-primary: #0f766e;
     --color-primary-dark: #115e59;
@@ -46,6 +48,7 @@
     --font-heading: "Bricolage Grotesque", "DM Sans", system-ui, sans-serif;
 }
 
+/* border-box: padding en rand tellen mee in de breedte, dan klopt width: 100% altijd. */
 *,
 *::before,
 *::after {
@@ -81,6 +84,7 @@ p { margin: 0 0 0.75rem; }
 a { color: var(--color-primary); }
 a:hover { color: var(--color-primary-dark); }
 
+/* Duidelijke rand om het element waar je met het toetsenbord (Tab) op staat. */
 :focus-visible {
     outline: 3px solid var(--color-accent);
     outline-offset: 2px;
@@ -102,6 +106,7 @@ a:hover { color: var(--color-primary-dark); }
 .muted { color: var(--color-muted); }
 .optional { color: var(--color-muted); font-weight: 400; }
 
+/* Onzichtbaar op het scherm, maar wel voorgelezen door schermlezers. */
 .visually-hidden {
     position: absolute !important;
     width: 1px;
@@ -165,6 +170,8 @@ a:hover { color: var(--color-primary-dark); }
     cursor: pointer;
 }
 
+/* Mobile first: eerst de stijl voor kleine schermen. Met JavaScript wordt het menu ingeklapt achter de knop "Menu".
+   Zonder JavaScript (geen klasse .js) blijft het menu gewoon zichtbaar. */
 .js .nav-toggle { display: inline-block; }
 .js .main-nav { display: none; }
 .js .main-nav.is-open { display: flex; }
@@ -220,6 +227,7 @@ a:hover { color: var(--color-primary-dark); }
     font-weight: 600;
 }
 
+/* Vanaf 900px breed (laptop): menu naast het logo, geen menuknop. */
 @media (min-width: 900px) {
     .js .nav-toggle { display: none; }
     .js .main-nav,
@@ -320,6 +328,7 @@ a:hover { color: var(--color-primary-dark); }
     margin-bottom: 0.75rem;
 }
 
+/* Raster dat zelf bepaalt hoeveel kaarten naast elkaar passen (minimaal 260px per kaart). */
 .card-grid {
     display: grid;
     gap: 1rem;
@@ -509,6 +518,7 @@ a:hover { color: var(--color-primary-dark); }
 .table__number { text-align: right !important; }
 .table__actions { display: flex; flex-wrap: wrap; gap: 0.4rem; justify-content: flex-end; }
 
+/* Smaller dan 700px: elke tabelrij wordt een kaartje. De kolomkop komt uit data-label (content: attr(data-label)). */
 @media (max-width: 699px) {
     .table thead { display: none; }
     .table tr {
@@ -737,6 +747,14 @@ textarea:focus {
     margin-top: 1.5rem;
     background: var(--color-highlight-soft);
     border-color: var(--color-highlight);
+}
+
+/* Het woordje "Tip" boven de titel. */
+.tip-card__label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #713f12;
+    margin-bottom: 0.25rem;
 }
 
 .notice { margin-top: 1.5rem; font-size: 0.9rem; color: var(--color-muted); }

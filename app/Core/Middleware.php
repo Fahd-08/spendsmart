@@ -7,15 +7,19 @@ namespace App\Core;
 use InvalidArgumentException;
 
 /**
- * Toegangscontrole per route:
+ * Toegangscontrole per route. Wordt door de Router uitgevoerd vóórdat de controller start.
  *  - auth           alleen voor ingelogde gebruikers
  *  - guest          alleen voor bezoekers die niet zijn ingelogd
  *  - role:<rol>     alleen voor accounts met deze rol
  */
 final class Middleware
 {
+    /**
+     * Voert één middleware uit, bijv. 'auth' of 'role:user'.
+     */
     public static function run(string $name): void
     {
+        // 'role:user' splitsen in type 'role' en argument 'user'. Bij 'auth' is het argument leeg.
         [$type, $argument] = array_pad(explode(':', $name, 2), 2, '');
 
         match ($type) {
@@ -26,6 +30,9 @@ final class Middleware
         };
     }
 
+    /**
+     * Niet ingelogd? Dan naar de inlogpagina met een melding.
+     */
     private static function requireLogin(): void
     {
         if (!Auth::check()) {
@@ -34,6 +41,9 @@ final class Middleware
         }
     }
 
+    /**
+     * Al ingelogd? Dan heeft de inlog- of registratiepagina geen zin: naar je eigen startpagina.
+     */
     private static function requireGuest(): void
     {
         if (Auth::check()) {
@@ -41,6 +51,10 @@ final class Middleware
         }
     }
 
+    /**
+     * Verkeerde rol? Dan een 403-foutpagina (geen toegang).
+     * Zo kan een gebruiker niet bij de beheerpagina's en een contentbeheerder niet bij persoonlijke gegevens.
+     */
     private static function requireRole(string $role): void
     {
         if (!Auth::hasRole($role)) {

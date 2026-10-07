@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Spaardoel toevoegen'. Het formulier staat in partials/forms/goal.php.
+ *
  * @var array $values
  * @var array $errors
  */

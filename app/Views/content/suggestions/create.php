@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Categorievoorstel toevoegen'. Het formulier staat in partials/forms/suggestion.php.
+ *
  * @var array $values
  * @var array $errors
  */

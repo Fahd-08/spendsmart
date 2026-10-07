@@ -1,5 +1,7 @@
 <?php
 /**
+ * Foutpagina (bijv. 403, 404, 419, 500). Wordt getoond door de ErrorHandler.
+ *
  * @var int $status
  * @var string $title
  * @var string $message
@@ -11,6 +13,7 @@
     <p><?= e($message) ?></p>
     <div class="form__actions">
         <a class="button button--primary" href="<?= e(url('/')) ?>">Naar de startpagina</a>
+        <?php // Bij 'niet ingelogd' of 'sessie verlopen' ook een knop naar inloggen. ?>
         <?php if ($status === 401 || $status === 419): ?>
             <a class="button button--ghost" href="<?= e(url('/login')) ?>">Inloggen</a>
         <?php endif; ?>

@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Transactie wijzigen'. Zelfde formulier als toevoegen, maar met de bestaande gegevens ingevuld.
+ *
  * @var array $transaction
  * @var array $categories
  * @var array $values

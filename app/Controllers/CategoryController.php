@@ -12,24 +12,31 @@ use App\Repositories\CategorySuggestionRepository;
 use App\Support\CategoryType;
 
 /**
- * Eigen categorieën beheren, met optionele maandlimiet voor uitgaven.
+ * Eigen categorieën beheren, met optionele maandlimiet voor uitgaven (FE-07),
+ * en categorievoorstellen overnemen (FE-10).
  */
 final class CategoryController extends Controller
 {
+    /** Veldnamen zoals de gebruiker ze ziet in foutmeldingen. */
     private const LABELS = [
         'name' => 'Naam',
         'type' => 'Soort',
         'monthly_budget' => 'Maandlimiet',
     ];
 
+    /** Velden van het formulier. */
     private const FIELDS = ['name', 'type', 'monthly_budget'];
 
+    /**
+     * GET /categories: eigen categorieën + voorstellen die je nog niet hebt overgenomen.
+     */
     public function index(): void
     {
         $userId = $this->userId();
         $categories = new CategoryRepository($this->db());
         $adoptedIds = $categories->adoptedSuggestionIds($userId);
 
+        // Alleen actieve voorstellen tonen die de gebruiker nog niet heeft.
         $suggestions = array_filter(
             (new CategorySuggestionRepository($this->db()))->active(),
             static fn (array $suggestion): bool => !in_array((int) $suggestion['id'], $adoptedIds, true)
@@ -42,11 +49,17 @@ final class CategoryController extends Controller
         ]);
     }
 
+    /**
+     * GET /categories/create: leeg formulier (standaard een uitgavencategorie).
+     */
     public function create(): void
     {
         $this->showForm('categories/create', ['name' => '', 'type' => CategoryType::EXPENSE, 'monthly_budget' => '']);
     }
 
+    /**
+     * POST /categories: nieuwe categorie opslaan.
+     */
     public function store(): void
     {
         $userId = $this->userId();
@@ -64,6 +77,9 @@ final class CategoryController extends Controller
         $this->redirect('/categories');
     }
 
+    /**
+     * GET /categories/{id}/edit: formulier met de bestaande gegevens.
+     */
     public function edit(int $id): void
     {
         $category = $this->findOrFail($id);
@@ -75,6 +91,9 @@ final class CategoryController extends Controller
         ], [], 200, $category);
     }
 
+    /**
+     * POST /categories/{id}/update: wijzigingen opslaan.
+     */
     public function update(int $id): void
     {
         $userId = $this->userId();
@@ -93,12 +112,16 @@ final class CategoryController extends Controller
         $this->redirect('/categories');
     }
 
+    /**
+     * POST /categories/{id}/delete: categorie verwijderen, maar alleen als hij leeg is.
+     */
     public function destroy(int $id): void
     {
         $userId = $this->userId();
         $category = $this->findOrFail($id);
         $categories = new CategoryRepository($this->db());
 
+        // Staan er nog transacties in? Dan niet verwijderen, anders raken die transacties hun categorie kwijt.
         if ($categories->hasTransactions($id, $userId)) {
             Flash::add('error', 'Categorie "' . $category['name'] . '" kan niet worden verwijderd, omdat er nog transacties in staan. Wijzig of verwijder eerst die transacties.');
             $this->redirect('/categories');
@@ -111,21 +134,25 @@ final class CategoryController extends Controller
     }
 
     /**
-     * Een algemeen categorievoorstel overnemen als eigen categorie.
+     * POST /categories/adopt/{id}: een algemeen categorievoorstel overnemen als eigen categorie.
      */
     public function adopt(int $suggestionId): void
     {
         $userId = $this->userId();
+
+        // Alleen actieve voorstellen kunnen worden overgenomen; anders 404.
         $suggestion = (new CategorySuggestionRepository($this->db()))->findActive($suggestionId)
             ?? $this->notFound('Dit categorievoorstel bestaat niet (meer).');
 
         $categories = new CategoryRepository($this->db());
 
+        // Heb je al een categorie met die naam en soort? Dan geen dubbele maken.
         if ($categories->nameExists($userId, $suggestion['name'], $suggestion['type'])) {
             Flash::add('info', 'Je hebt al een categorie "' . $suggestion['name'] . '".');
             $this->redirect('/categories');
         }
 
+        // Nieuwe categorie, gekoppeld aan het voorstel (voor de statistieken).
         $categories->create($userId, [
             'name' => $suggestion['name'],
             'type' => $suggestion['type'],
@@ -138,6 +165,8 @@ final class CategoryController extends Controller
     }
 
     /**
+     * Controleert het formulier. Bij wijzigen is $existing de huidige categorie.
+     *
      * @return array{0: array, 1: array<string, string>}
      */
     private function validate(int $userId, ?array $existing = null): array
@@ -145,13 +174,14 @@ final class CategoryController extends Controller
         $validator = Validator::make($this->request->body(), [
             'name' => 'required|max:60',
             'type' => 'required|' . CategoryType::ruleIn(),
-            'monthly_budget' => 'money_zero',
+            'monthly_budget' => 'money_zero', // optioneel; € 0,00 mag
         ], self::LABELS);
 
         $values = $validator->validated();
         $categories = new CategoryRepository($this->db());
         $existingId = $existing === null ? null : (int) $existing['id'];
 
+        // Geen twee categorieën met dezelfde naam en soort (Boodschappen als inkomst én uitgave mag wel).
         if (isset($values['name'], $values['type'])
             && $categories->nameExists($userId, $values['name'], $values['type'], $existingId)) {
             $validator->addError('name', 'Je hebt al een ' . mb_strtolower(CategoryType::label($values['type'])) . 'categorie met deze naam.');
@@ -175,6 +205,9 @@ final class CategoryController extends Controller
         ], []];
     }
 
+    /**
+     * Toont het formulier voor toevoegen of wijzigen.
+     */
     private function showForm(string $template, array $values, array $errors = [], int $status = 200, ?array $category = null): void
     {
         $this->view($template, [
@@ -185,6 +218,9 @@ final class CategoryController extends Controller
         ], $status);
     }
 
+    /**
+     * Zoekt een categorie van de ingelogde gebruiker, of toont 404.
+     */
     private function findOrFail(int $id): array
     {
         return (new CategoryRepository($this->db()))->findForUser($id, $this->userId())

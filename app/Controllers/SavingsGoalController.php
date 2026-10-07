@@ -11,10 +11,11 @@ use App\Repositories\SavingsGoalRepository;
 use App\Support\Money;
 
 /**
- * Spaardoelen beheren en er bedragen aan toevoegen.
+ * Spaardoelen beheren en er bedragen aan toevoegen (FE-08).
  */
 final class SavingsGoalController extends Controller
 {
+    /** Veldnamen zoals de gebruiker ze ziet in foutmeldingen. */
     private const LABELS = [
         'name' => 'Naam van het doel',
         'target_amount' => 'Doelbedrag',
@@ -23,8 +24,12 @@ final class SavingsGoalController extends Controller
         'amount' => 'Bedrag',
     ];
 
+    /** Velden van het formulier. */
     private const FIELDS = ['name', 'target_amount', 'saved_amount', 'target_date'];
 
+    /**
+     * GET /goals: alle spaardoelen van de gebruiker.
+     */
     public function index(): void
     {
         $this->view('goals/index', [
@@ -33,11 +38,17 @@ final class SavingsGoalController extends Controller
         ]);
     }
 
+    /**
+     * GET /goals/create: leeg formulier.
+     */
     public function create(): void
     {
         $this->showForm('goals/create', ['name' => '', 'target_amount' => '', 'saved_amount' => '', 'target_date' => '']);
     }
 
+    /**
+     * POST /goals: nieuw spaardoel opslaan.
+     */
     public function store(): void
     {
         [$data, $errors] = $this->validate(true);
@@ -54,6 +65,9 @@ final class SavingsGoalController extends Controller
         $this->redirect('/goals');
     }
 
+    /**
+     * GET /goals/{id}/edit: formulier met de bestaande gegevens.
+     */
     public function edit(int $id): void
     {
         $goal = $this->findOrFail($id);
@@ -66,6 +80,9 @@ final class SavingsGoalController extends Controller
         ], [], 200, $goal);
     }
 
+    /**
+     * POST /goals/{id}/update: wijzigingen opslaan.
+     */
     public function update(int $id): void
     {
         $goal = $this->findOrFail($id);
@@ -83,11 +100,15 @@ final class SavingsGoalController extends Controller
         $this->redirect('/goals');
     }
 
+    /**
+     * POST /goals/{id}/deposit: een bedrag toevoegen aan het gespaarde bedrag.
+     */
     public function deposit(int $id): void
     {
         $goal = $this->findOrFail($id);
         $validator = Validator::make($this->request->body(), ['amount' => 'required|money'], self::LABELS);
 
+        // Ongeldig bedrag: foutmelding en terug naar het overzicht.
         if ($validator->fails()) {
             Flash::add('error', 'Bedrag niet toegevoegd aan "' . $goal['name'] . '": ' . $validator->errors()['amount']);
             $this->redirect('/goals');
@@ -96,6 +117,7 @@ final class SavingsGoalController extends Controller
         $amount = $validator->validated()['amount'];
         $goals = new SavingsGoalRepository($this->db());
 
+        // De database telt op en weigert als het maximum wordt overschreden.
         if (!$goals->addToSaved($id, $this->userId(), $amount)) {
             Flash::add('error', 'Dit bedrag is te hoog: het gespaarde bedrag mag niet hoger worden dan ' . Money::format(Money::MAX_CENTS) . '.');
             $this->redirect('/goals');
@@ -104,6 +126,7 @@ final class SavingsGoalController extends Controller
         $newSaved = (int) $goal['saved_cents'] + $amount;
         Flash::add('success', Money::format($amount) . ' toegevoegd aan "' . $goal['name'] . '".');
 
+        // Door deze storting is het doel net bereikt? Dan een felicitatie.
         if ((int) $goal['saved_cents'] < (int) $goal['target_cents'] && $newSaved >= (int) $goal['target_cents']) {
             Flash::add('success', 'Je hebt je spaardoel "' . $goal['name'] . '" bereikt!');
         }
@@ -111,6 +134,9 @@ final class SavingsGoalController extends Controller
         $this->redirect('/goals');
     }
 
+    /**
+     * POST /goals/{id}/delete: spaardoel verwijderen.
+     */
     public function destroy(int $id): void
     {
         $goal = $this->findOrFail($id);
@@ -121,19 +147,24 @@ final class SavingsGoalController extends Controller
     }
 
     /**
+     * Controleert het formulier.
+     *
+     * @param bool $isNew true bij aanmaken: dan mag de streefdatum niet in het verleden liggen.
+     *                    Bij wijzigen mag een oude datum blijven staan.
      * @return array{0: array, 1: array<string, string>}
      */
     private function validate(bool $isNew): array
     {
         $validator = Validator::make($this->request->body(), [
             'name' => 'required|max:100',
-            'target_amount' => 'required|money',
-            'saved_amount' => 'money_zero',
-            'target_date' => 'date',
+            'target_amount' => 'required|money', // doelbedrag moet groter dan 0 zijn
+            'saved_amount' => 'money_zero',       // optioneel, 0 mag
+            'target_date' => 'date',              // optioneel
         ], self::LABELS);
 
         $values = $validator->validated();
 
+        // Datums als tekst 'JJJJ-MM-DD' kun je gewoon vergelijken: '2026-01-01' < '2026-10-07'.
         if ($isNew && isset($values['target_date']) && $values['target_date'] < date('Y-m-d')) {
             $validator->addError('target_date', 'De streefdatum mag niet in het verleden liggen.');
         }
@@ -145,11 +176,14 @@ final class SavingsGoalController extends Controller
         return [[
             'name' => $values['name'],
             'target_cents' => $values['target_amount'],
-            'saved_cents' => $values['saved_amount'] ?? 0,
+            'saved_cents' => $values['saved_amount'] ?? 0, // niets ingevuld = 0
             'target_date' => $values['target_date'],
         ], []];
     }
 
+    /**
+     * Toont het formulier voor toevoegen of wijzigen.
+     */
     private function showForm(string $template, array $values, array $errors = [], int $status = 200, ?array $goal = null): void
     {
         $this->view($template, [
@@ -160,6 +194,9 @@ final class SavingsGoalController extends Controller
         ], $status);
     }
 
+    /**
+     * Zoekt een spaardoel van de ingelogde gebruiker, of toont 404.
+     */
     private function findOrFail(int $id): array
     {
         return (new SavingsGoalRepository($this->db()))->findForUser($id, $this->userId())

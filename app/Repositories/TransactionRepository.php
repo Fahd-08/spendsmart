@@ -12,6 +12,10 @@ use App\Support\Month;
  */
 final class TransactionRepository extends Repository
 {
+    /**
+     * Basisquery: transactie met de naam en soort van de categorie.
+     * "c.user_id = t.user_id" is een extra controle dat categorie en transactie van dezelfde gebruiker zijn.
+     */
     private const SELECT_WITH_CATEGORY =
         'SELECT t.id, t.amount_cents, t.transaction_date, t.description,
                 c.id AS category_id, c.name AS category_name, c.type
@@ -19,20 +23,26 @@ final class TransactionRepository extends Repository
          JOIN categories c ON c.id = t.category_id AND c.user_id = t.user_id';
 
     /**
+     * Transacties van één maand, eventueel gefilterd op categorie en/of soort (FE-05).
+     * Nieuwste eerst.
+     *
      * @param string|null $type 'income', 'expense' of null voor alles
      */
     public function filterForUser(int $userId, Month $month, ?int $categoryId = null, ?string $type = null): array
     {
+        // Basis: van deze gebruiker en binnen de maand (begin t/m dag vóór de volgende maand).
         $sql = self::SELECT_WITH_CATEGORY . '
             WHERE t.user_id = :user_id
               AND t.transaction_date >= :start AND t.transaction_date < :end';
         $parameters = ['user_id' => $userId, 'start' => $month->start(), 'end' => $month->end()];
 
+        // Alleen als er op categorie gefilterd wordt, die voorwaarde toevoegen.
         if ($categoryId !== null) {
             $sql .= ' AND t.category_id = :category_id';
             $parameters['category_id'] = $categoryId;
         }
 
+        // Alleen als er op soort gefilterd wordt (inkomsten of uitgaven).
         if ($type !== null) {
             $sql .= ' AND c.type = :type';
             $parameters['type'] = $type;
@@ -43,17 +53,23 @@ final class TransactionRepository extends Repository
         return $this->fetchAll($sql, $parameters);
     }
 
+    /**
+     * De laatste transacties van een maand (voor het dashboard).
+     */
     public function recentForUser(int $userId, Month $month, int $limit = 5): array
     {
         return $this->fetchAll(
             self::SELECT_WITH_CATEGORY . '
              WHERE t.user_id = :user_id AND t.transaction_date >= :start AND t.transaction_date < :end
              ORDER BY t.transaction_date DESC, t.id DESC
-             LIMIT ' . max(1, $limit),
+             LIMIT ' . max(1, $limit), // $limit is een int uit onze eigen code, geen gebruikersinvoer
             ['user_id' => $userId, 'start' => $month->start(), 'end' => $month->end()]
         );
     }
 
+    /**
+     * Eén transactie, alleen als die van deze gebruiker is (anders null -> 404).
+     */
     public function findForUser(int $id, int $userId): ?array
     {
         return $this->fetchOne(
@@ -63,6 +79,8 @@ final class TransactionRepository extends Repository
     }
 
     /**
+     * Nieuwe transactie opslaan.
+     *
      * @param array{category_id: int, amount_cents: int, transaction_date: string, description: ?string} $data
      */
     public function create(int $userId, array $data): int
@@ -74,6 +92,9 @@ final class TransactionRepository extends Repository
         );
     }
 
+    /**
+     * Transactie wijzigen (alleen je eigen).
+     */
     public function update(int $id, int $userId, array $data): void
     {
         $this->execute(
@@ -85,6 +106,9 @@ final class TransactionRepository extends Repository
         );
     }
 
+    /**
+     * Transactie verwijderen (alleen je eigen).
+     */
     public function delete(int $id, int $userId): void
     {
         $this->execute('DELETE FROM transactions WHERE id = :id AND user_id = :user_id', [
@@ -94,10 +118,13 @@ final class TransactionRepository extends Repository
     }
 
     /**
+     * Totaal inkomsten en uitgaven in een maand (FE-06). De database telt op in centen.
+     *
      * @return array{income: int, expense: int}
      */
     public function totalsForMonth(int $userId, Month $month): array
     {
+        // CASE WHEN: tel het bedrag alleen mee bij de juiste soort. COALESCE: geen transacties = 0 in plaats van NULL.
         $row = $this->fetchOne(
             "SELECT
                 COALESCE(SUM(CASE WHEN c.type = 'income' THEN t.amount_cents END), 0) AS income,
@@ -113,6 +140,7 @@ final class TransactionRepository extends Repository
 
     /**
      * Uitgaven per uitgavencategorie in een maand, ook categorieën zonder uitgaven.
+     * LEFT JOIN: categorieën zonder transacties komen ook mee (met 0). Gebruikt door de BudgetService.
      */
     public function expensesPerCategory(int $userId, Month $month): array
     {
@@ -131,6 +159,9 @@ final class TransactionRepository extends Repository
         );
     }
 
+    /**
+     * Totaal uitgegeven in één categorie in een maand (voor de waarschuwing na opslaan).
+     */
     public function spentInCategory(int $userId, int $categoryId, Month $month): int
     {
         return (int) $this->fetchValue(
@@ -141,6 +172,9 @@ final class TransactionRepository extends Repository
         );
     }
 
+    /**
+     * De kolomwaarden die bij create en update hetzelfde zijn.
+     */
     private function columns(array $data): array
     {
         return [

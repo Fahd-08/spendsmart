@@ -7,6 +7,9 @@ namespace App\Repositories;
 use App\Support\Role;
 use Throwable;
 
+/**
+ * Alle databasequeries voor de tabel 'users' (accounts).
+ */
 final class UserRepository extends Repository
 {
     /**
@@ -31,6 +34,9 @@ final class UserRepository extends Repository
         );
     }
 
+    /**
+     * Alleen de wachtwoordhash, om het huidige wachtwoord te controleren (bijv. bij account verwijderen).
+     */
     public function passwordHash(int $id): ?string
     {
         $hash = $this->fetchValue('SELECT password_hash FROM users WHERE id = :id', ['id' => $id]);
@@ -38,6 +44,9 @@ final class UserRepository extends Repository
         return is_string($hash) ? $hash : null;
     }
 
+    /**
+     * Bestaat dit e-mailadres al? Bij profiel wijzigen telt je eigen account niet mee ($exceptUserId).
+     */
     public function emailExists(string $email, ?int $exceptUserId = null): bool
     {
         return (bool) $this->fetchValue(
@@ -46,6 +55,9 @@ final class UserRepository extends Repository
         );
     }
 
+    /**
+     * Nieuw account opslaan. Het wachtwoord komt hier al gehasht binnen.
+     */
     public function create(string $name, string $email, string $passwordHash, string $role = Role::USER): int
     {
         return $this->insert(
@@ -54,6 +66,9 @@ final class UserRepository extends Repository
         );
     }
 
+    /**
+     * Naam en e-mailadres wijzigen.
+     */
     public function updateProfile(int $id, string $name, string $email): void
     {
         $this->execute(
@@ -62,6 +77,9 @@ final class UserRepository extends Repository
         );
     }
 
+    /**
+     * Nieuwe wachtwoordhash opslaan.
+     */
     public function updatePassword(int $id, string $passwordHash): void
     {
         $this->execute(
@@ -73,9 +91,11 @@ final class UserRepository extends Repository
     /**
      * Verwijdert het account met alle persoonlijke gegevens.
      * Transacties eerst, omdat categorieën met transacties beschermd zijn (ON DELETE RESTRICT).
+     * Categorieën en spaardoelen verdwijnen daarna automatisch (ON DELETE CASCADE in het schema).
      */
     public function delete(int $id): void
     {
+        // Databasetransactie: beide stappen lukken, of geen van beide.
         $this->db->beginTransaction();
 
         try {

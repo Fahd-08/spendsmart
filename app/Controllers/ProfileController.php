@@ -13,10 +13,11 @@ use App\Repositories\UserRepository;
 use App\Support\Role;
 
 /**
- * Eigen accountgegevens bekijken en wijzigen, wachtwoord wijzigen en account verwijderen.
+ * Eigen accountgegevens bekijken en wijzigen, wachtwoord wijzigen en account verwijderen (FE-03).
  */
 final class ProfileController extends Controller
 {
+    /** Veldnamen zoals de gebruiker ze ziet in foutmeldingen. */
     private const LABELS = [
         'name' => 'Naam',
         'email' => 'E-mailadres',
@@ -25,6 +26,9 @@ final class ProfileController extends Controller
         'delete_password' => 'Wachtwoord',
     ];
 
+    /**
+     * GET /profile: profielpagina met de huidige gegevens ingevuld.
+     */
     public function edit(): void
     {
         $user = Auth::user();
@@ -32,6 +36,9 @@ final class ProfileController extends Controller
         $this->showPage(['name' => $user['name'], 'email' => $user['email']]);
     }
 
+    /**
+     * POST /profile: naam en e-mailadres opslaan.
+     */
     public function update(): void
     {
         $userId = $this->userId();
@@ -45,6 +52,7 @@ final class ProfileController extends Controller
 
         $users = new UserRepository($this->db());
 
+        // Het e-mailadres mag niet al bij een ánder account horen (je eigen adres opnieuw opslaan mag wel).
         if (!isset($validator->errors()['email']) && $users->emailExists($input['email'], $userId)) {
             $validator->addError('email', 'Dit e-mailadres wordt al door een ander account gebruikt.');
         }
@@ -62,6 +70,10 @@ final class ProfileController extends Controller
         $this->redirect('/profile');
     }
 
+    /**
+     * POST /profile/password: wachtwoord wijzigen. Eerst het huidige wachtwoord controleren,
+     * zodat iemand die even achter je computer zit niet zomaar je wachtwoord kan veranderen.
+     */
     public function updatePassword(): void
     {
         $userId = $this->userId();
@@ -72,6 +84,7 @@ final class ProfileController extends Controller
             'password' => 'required|password|confirmed',
         ], self::LABELS);
 
+        // Huidig wachtwoord vergelijken met de hash in de database.
         if (!isset($validator->errors()['current_password'])
             && !password_verify($this->request->input('current_password'), (string) $users->passwordHash($userId))) {
             $validator->addError('current_password', 'Je huidige wachtwoord is onjuist.');
@@ -84,6 +97,7 @@ final class ProfileController extends Controller
             return;
         }
 
+        // Nieuw wachtwoord gehasht opslaan en een nieuw sessie-ID maken.
         $users->updatePassword($userId, password_hash($validator->validated()['password'], PASSWORD_DEFAULT));
         Session::regenerate();
 
@@ -92,12 +106,13 @@ final class ProfileController extends Controller
     }
 
     /**
-     * Gebruiker verwijdert eigen account en alle bijbehorende gegevens.
+     * POST /profile/delete: gebruiker verwijdert eigen account en alle bijbehorende gegevens.
      */
     public function destroy(): void
     {
         $userId = $this->userId();
 
+        // Extra controle (de route staat dit al alleen toe voor gebruikers): beheerders mogen zichzelf niet verwijderen.
         if (!Auth::hasRole(Role::USER)) {
             Flash::add('error', 'Een contentbeheerdersaccount kan niet zelf worden verwijderd. Neem contact op met MoneyMinds.');
             $this->redirect('/profile');
@@ -105,6 +120,7 @@ final class ProfileController extends Controller
 
         $users = new UserRepository($this->db());
 
+        // Ter bevestiging moet het wachtwoord worden ingevuld.
         if (!password_verify($this->request->input('delete_password'), (string) $users->passwordHash($userId))) {
             $user = Auth::user();
             $this->showPage(
@@ -116,6 +132,7 @@ final class ProfileController extends Controller
             return;
         }
 
+        // Account met alle transacties, categorieën en spaardoelen verwijderen, daarna uitloggen.
         $users->delete($userId);
         Auth::logout();
 
@@ -123,6 +140,9 @@ final class ProfileController extends Controller
         $this->redirect('/');
     }
 
+    /**
+     * Toont de profielpagina (gedeeld door alle methodes hierboven).
+     */
     private function showPage(array $values, array $errors = [], int $status = 200): void
     {
         $this->view('profile/edit', [
@@ -130,7 +150,7 @@ final class ProfileController extends Controller
             'user' => Auth::user(),
             'values' => $values,
             'errors' => $errors,
-            'canDeleteAccount' => Auth::hasRole(Role::USER),
+            'canDeleteAccount' => Auth::hasRole(Role::USER), // knop "account verwijderen" alleen voor gebruikers
         ], $status);
     }
 }

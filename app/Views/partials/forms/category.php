@@ -21,6 +21,7 @@ use App\Support\CategoryType;
         <?= field_error($errors, 'name') ?>
     </div>
 
+    <?php // Soort kiezen. data-toggle-budget: app.js verbergt de maandlimiet bij een inkomstencategorie. ?>
     <fieldset class="field">
         <legend>Soort</legend>
         <?php foreach (CategoryType::ALL as $type): ?>
@@ -32,6 +33,7 @@ use App\Support\CategoryType;
         <?= field_error($errors, 'type') ?>
     </fieldset>
 
+    <?php // Maandlimiet (optioneel). Leeg = geen limiet, 0 = limiet van € 0,00. ?>
     <div class="field" data-budget-field>
         <label for="monthly_budget">Maandlimiet <span class="optional">(optioneel, alleen voor uitgaven)</span></label>
         <p class="field-hint">Je eigen grens voor deze categorie per maand. Laat leeg als je geen limiet wilt.</p>

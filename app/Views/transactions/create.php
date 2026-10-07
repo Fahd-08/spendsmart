@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Transactie toevoegen'. Het formulier zelf staat in partials/forms/transaction.php.
+ *
  * @var array $categories
  * @var array $values
  * @var array $errors

@@ -1,5 +1,7 @@
 <?php
 /**
+ * Dashboard van de gebruiker (FE-06, FE-09): maandtotalen, limieten, laatste transacties, spaardoelen en een tip.
+ *
  * @var array $user
  * @var App\Support\Month $month
  * @var array{income: int, expense: int} $totals
@@ -14,6 +16,7 @@
 use App\Services\BudgetService;
 use App\Support\CategoryType;
 
+// Alleen categorieën mét limiet krijgen een balk.
 $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $line['budget_cents'] !== null);
 ?>
 <div class="page-header">
@@ -21,9 +24,11 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
         <h1>Hoi <?= e($user['name']) ?></h1>
         <p class="muted">Overzicht van <?= e($month->label()) ?></p>
     </div>
+    <?php // Maand kiezen (vorige / volgende). ?>
     <?= partial('month-filter', ['month' => $month, 'path' => '/dashboard']) ?>
 </div>
 
+<?php // FE-09: waarschuwing per overschreden limiet, met de zin 'geen financieel advies'. ?>
 <?php foreach ($exceeded as $line): ?>
     <?= partial('alert', [
         'type' => 'warning',
@@ -31,6 +36,7 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
     ]) ?>
 <?php endforeach; ?>
 
+<?php // FE-06: inkomsten, uitgaven en saldo van de gekozen maand. ?>
 <section class="stats" aria-label="Maandtotalen">
     <div class="stat card">
         <p class="stat__label">Inkomsten</p>
@@ -43,6 +49,7 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
     <div class="stat card">
         <p class="stat__label">Saldo deze maand</p>
         <p class="stat__value"><?= e(money($balance)) ?></p>
+        <?php // Status met kleur én tekst, zodat het ook zonder kleur duidelijk is. ?>
         <span class="status <?= $balance >= 0 ? 'status--ok' : 'status--over' ?>">
             <?= $balance >= 0 ? 'Meer ontvangen dan uitgegeven' : 'Meer uitgegeven dan ontvangen' ?>
         </span>
@@ -50,6 +57,7 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
 </section>
 
 <div class="dashboard-grid">
+    <?php // Limieten per categorie met voortgangsbalk (partial budget-bar). ?>
     <section class="card" aria-labelledby="budgets-title">
         <div class="section-header">
             <h2 id="budgets-title">Limieten per categorie</h2>
@@ -69,6 +77,7 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
         <?php endif; ?>
     </section>
 
+    <?php // De laatste 5 transacties van de maand. ?>
     <section class="card" aria-labelledby="recent-title">
         <div class="section-header">
             <h2 id="recent-title">Laatste transacties</h2>
@@ -100,6 +109,7 @@ $budgetsWithLimit = array_filter($budgets, static fn (array $line): bool => $lin
     </section>
 </div>
 
+<?php // Maximaal 3 spaardoelen (partial goal-card). ?>
 <section aria-labelledby="goals-title" class="section">
     <div class="section-header">
         <h2 id="goals-title">Spaardoelen</h2>

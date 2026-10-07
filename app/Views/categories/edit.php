@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Categorie wijzigen'. Zelfde formulier als toevoegen.
+ *
  * @var array $category
  * @var array $values
  * @var array $errors

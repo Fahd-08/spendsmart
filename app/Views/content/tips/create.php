@@ -1,5 +1,7 @@
 <?php
 /**
+ * Pagina 'Leertekst toevoegen'. Het formulier staat in partials/forms/tip.php.
+ *
  * @var array $values
  * @var array $errors
  */

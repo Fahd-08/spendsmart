@@ -22,10 +22,12 @@
     <div class="field">
         <label for="body">Tekst</label>
         <p class="field-hint">Schrijf algemeen en niet-persoonlijk. Geef geen advies over wat iemand met zijn geld moet doen. Tussen 20 en 5000 tekens.</p>
+        <?php // Tekst van 20 tot 5000 tekens. Bij een textarea staat de waarde tussen de tags in plaats van in value="". ?>
         <textarea id="body" name="body" rows="8" required maxlength="5000"<?= field_attributes($errors, 'body') ?>><?= e($values['body']) ?></textarea>
         <?= field_error($errors, 'body') ?>
     </div>
 
+    <?php // Vinkje publiceren: niet aangevinkt = opslaan als concept. ?>
     <div class="field field--checkbox">
         <input type="checkbox" id="is_published" name="is_published" value="1"<?= $values['is_published'] === '1' ? ' checked' : '' ?>>
         <label for="is_published">Publiceren (zichtbaar voor gebruikers)</label>

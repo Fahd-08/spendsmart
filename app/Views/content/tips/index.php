@@ -1,5 +1,7 @@
 <?php
 /**
+ * Beheerpagina leerteksten (FE-11): alle teksten, ook concepten.
+ *
  * @var array $tips
  */
 ?>
@@ -35,6 +37,7 @@
                 <?php foreach ($tips as $tip): ?>
                     <tr>
                         <td data-label="Titel"><?= e($tip['title']) ?></td>
+                        <?php // Gepubliceerd (zichtbaar voor gebruikers) of Concept (alleen voor de contentbeheerder). ?>
                         <td data-label="Status">
                             <span class="status <?= $tip['is_published'] ? 'status--ok' : 'status--none' ?>">
                                 <?= $tip['is_published'] ? 'Gepubliceerd' : 'Concept' ?>

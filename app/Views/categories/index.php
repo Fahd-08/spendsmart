@@ -1,5 +1,7 @@
 <?php
 /**
+ * Categorieënpagina (FE-07, FE-10): eigen categorieën per soort en voorstellen om over te nemen.
+ *
  * @var array $categories
  * @var array $suggestions
  */
@@ -21,6 +23,7 @@ use App\Support\CategoryType;
         'actionLabel' => 'Categorie toevoegen',
     ]) ?>
 <?php else: ?>
+    <?php // Eerst alle uitgaven, dan alle inkomsten, elk in een eigen blok. ?>
     <?php foreach (CategoryType::ALL as $type): ?>
         <?php $categoriesOfType = array_filter($categories, static fn (array $category): bool => $category['type'] === $type); ?>
         <section class="card section" aria-labelledby="categories-<?= e($type) ?>">
@@ -35,6 +38,7 @@ use App\Support\CategoryType;
                             <div>
                                 <span class="chip chip--<?= e($category['type']) ?>"><?= e($category['name']) ?></span>
                                 <span class="muted">
+                                    <?php // Alleen bij uitgaven de maandlimiet tonen. ?>
                                     <?php if ($type === CategoryType::EXPENSE): ?>
                                         <?= $category['monthly_budget_cents'] === null
                                             ? 'Geen maandlimiet'
@@ -58,6 +62,7 @@ use App\Support\CategoryType;
     <?php endforeach; ?>
 <?php endif; ?>
 
+<?php // FE-10: voorstellen van de contentbeheerder. Elke knop is een klein POST-formulier naar /categories/adopt/{id}. ?>
 <section class="card section" aria-labelledby="suggestions-title">
     <h2 id="suggestions-title">Voorstellen van MoneyMinds</h2>
 
