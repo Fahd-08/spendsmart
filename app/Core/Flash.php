@@ -41,6 +41,11 @@ final class Flash
         $messages = Session::get(self::SESSION_KEY, []);
         Session::set(self::SESSION_KEY, []);
 
+        // Belangrijkste meldingen eerst: fouten en waarschuwingen boven "gelukt" en info,
+        // zodat een waarschuwing (bijv. limiet overschreden) niet onder een andere melding verdwijnt.
+        $order = array_flip(['error', 'warning', 'success', 'info']);
+        usort($messages, static fn (array $a, array $b): int => $order[$a['type']] <=> $order[$b['type']]);
+
         return $messages;
     }
 }

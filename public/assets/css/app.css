@@ -669,8 +669,29 @@ textarea:focus {
 .alert--success .alert__icon::before { content: "✓"; }
 .alert--error { background: var(--color-over-bg); border-color: var(--color-over); color: var(--color-over); }
 .alert--error .alert__icon::before { content: "✕"; }
-.alert--warning { background: var(--color-warning-bg); border-color: #d97706; color: var(--color-warning); }
 .alert--warning .alert__icon::before { content: "!"; }
+
+/* Waarschuwing (bijv. limiet overschreden) moet opvallen: feller geel, dikke rand en een rond icoon.
+   Aangepast na feedback van de opdrachtgever (gesprek 8 oktober 2026). */
+.alert--warning {
+    background: var(--color-highlight);
+    border-color: #b45309;
+    border-left-width: 8px;
+    color: #451a03;
+    padding: 1rem 1.25rem;
+    font-size: 1.05rem;
+}
+
+.alert--warning .alert__icon {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 1.75rem;
+    height: 1.75rem;
+    border-radius: 50%;
+    background: #b45309;
+    color: #fff;
+}
 .alert--info { background: var(--color-info-bg); border-color: var(--color-primary); color: var(--color-info); }
 .alert--info .alert__icon::before { content: "i"; }
 
